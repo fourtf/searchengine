@@ -28,4 +28,5 @@ jobs:
         #cache: 'yarn'
     - run: |
         cd frontend
+        yarn
         yarn test
