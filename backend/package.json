@@ -4,12 +4,16 @@
   "description": "",
   "main": "src/main.js",
   "scripts": {
-    "start": "node src/main.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon src/main.ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "fastify": "^3.19.2"
+    "fastify": "^3.19.2",
+    "@types/node": "^16.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.13",
+    "ts-node": "^10.3.0"
   }
 }
