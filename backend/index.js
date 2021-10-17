@@ -13,12 +13,32 @@ async function count() {
   return count.body;
 }
 
+async function search(event) {
+  const result = await client.search({
+    index: 'songs',
+    body: {
+      query: {
+        match: {
+          artists: event.queryStringParameters?.q
+        }
+      }
+    }
+  });
+  return result.body;
+}
+
 exports.handler = async (event) => {
   const { requestContext: { http: { method, path } } } = event;
 
   if (path === "/songs" && method === "GET") {
     return await count();
   }
+  if (path == "/search" && method === "GET") {
+    return await search(event);
+  }
+  if (path == "/typing" && method === "GET") {
+    // todo: implement typing
+  }
 
-  return {event};
+  return event;
 };
