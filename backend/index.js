@@ -20,9 +20,5 @@ exports.handler = async (event) => {
     return await count();
   }
 
-  return {
-    statusCode: 404,
-    error: "Not Found",
-    data: { path, method },
-  };
+  return {event};
 };
