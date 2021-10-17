@@ -25,7 +25,8 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: ${{ matrix.node-version }}
-        #cache: 'yarn'
+        cache: 'yarn'
+        cache-dependency-path: backend/yarn.lock
     - run: |
         cd frontend
         yarn
