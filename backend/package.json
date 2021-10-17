@@ -9,8 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@elastic/elasticsearch": "^7.15.0",
+    "@types/node": "^16.11.0",
     "fastify": "^3.19.2",
-    "@types/node": "^16.11.0"
+    "typescript": "^4.4.4"
   },
   "devDependencies": {
     "nodemon": "^2.0.13",
