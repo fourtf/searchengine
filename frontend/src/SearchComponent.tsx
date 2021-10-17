@@ -1,8 +1,7 @@
-import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import SearchIcon from "@mui/icons-material/Search";
 import EastIcon from "@mui/icons-material/East";
-import { Component, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import { alignCenter, justifyCenter } from "./util";
 import Card from "@mui/material/Card";
@@ -126,7 +125,7 @@ function SearchInput(props: any) {
       value={content}
       onChange={(
         e,
-      ) => (console.log(e.target.value), setContent(e.target.value))}
+      ) => setContent(e.target.value)}
     />
   );
 
