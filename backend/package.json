@@ -2,9 +2,9 @@
   "name": "searchengine",
   "version": "1.0.0",
   "description": "",
-  "main": "src/main.js",
+  "main": "index.js",
   "scripts": {
-    "start": "nodemon src/main.ts"
+    "start": "nodemon index.js"
   },
   "author": "",
   "license": "ISC",
