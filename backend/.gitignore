@@ -4,4 +4,4 @@ dev.js
 *.zip
 .parcel-cache/
 dist/
-
+dist-cli/

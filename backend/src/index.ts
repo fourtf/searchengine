@@ -1,6 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { Client } from "@elastic/elasticsearch";
-import cli from "./cli";
 
 const client = new Client({ node: "http://node-1.hska.io:9200/" });
 
@@ -26,8 +25,3 @@ export const handler = async (
 
   return { statusCode: 200, body: JSON.stringify(event) };
 };
-
-
-if (require.main === module) {
-  cli(handler);
-}
