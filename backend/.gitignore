@@ -2,3 +2,6 @@ node_modules
 .vscode
 dev.js
 *.zip
+.parcel-cache/
+dist/
+

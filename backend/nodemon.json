@@ -1,7 +1,0 @@
-{
-  "watch": "src/**/*.ts",
-  "ignore": ".git",
-  "execMap": {
-    "ts": "ts-node"
-  }
-}

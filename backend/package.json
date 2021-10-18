@@ -2,19 +2,18 @@
   "name": "searchengine",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "build": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=node",
+    "watch": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=node --watch ",
+    "query": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=node && node dist/index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@elastic/elasticsearch": "^7.15.0",
+    "@types/aws-lambda": "^8",
     "@types/node": "^16.11.0",
+    "esbuild": "^0.13.8",
     "typescript": "^4.4.4"
-  },
-  "devDependencies": {
-    "nodemon": "^2.0.13",
-    "ts-node": "^10.3.0"
   }
 }
