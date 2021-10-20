@@ -5,3 +5,4 @@ dev.js
 .parcel-cache/
 dist/
 dist-cli/
+dist-serve/

@@ -5,7 +5,8 @@
   "scripts": {
     "build": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=node",
     "watch": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=node --watch ",
-    "query": "esbuild src/cli.ts   --bundle --outfile=dist-cli/index.js --platform=node && node dist-cli/index.js"
+    "query": "esbuild src/cli.ts   --bundle --outfile=dist-cli/index.js --platform=node && node dist-cli/index.js",
+    "serve": "esbuild src/serve.ts --bundle --outfile=dist-serve/index.js --platform=node && node dist-serve/index.js"
   },
   "author": "",
   "license": "ISC",
