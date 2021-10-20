@@ -22,6 +22,9 @@ export const handler = async (
   if (path === "/songs" && method === "GET") {
     return { statusCode: 200, body: JSON.stringify(await count()) };
   }
+  if (path === "/typing" && method === "GET") {
+    return { statusCode: 200, body: JSON.stringify(await count()) };
+  }
 
   return { statusCode: 200, body: JSON.stringify(event) };
 };

@@ -10,9 +10,10 @@ const server = createServer(
         "http://example.com" + req.url ?? ""
       );
       const method = req.method ?? "GET";
+      const body = await readBody(req);
 
       const x = await handler({
-        body: await readBody(req),
+        body,
         headers: {},
         httpMethod: method,
         isBase64Encoded: false,
@@ -30,6 +31,7 @@ const server = createServer(
 
       res.writeHead(x.statusCode, "", headersToString(x.headers ?? {}));
       res.write(x.body ?? "");
+      res.end();
     } catch (e) {
       console.log("error in serve.ts", e);
     }

@@ -6,7 +6,7 @@
     "build": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=node",
     "watch": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=node --watch ",
     "query": "esbuild src/cli.ts   --bundle --outfile=dist-cli/index.js --platform=node && node dist-cli/index.js",
-    "serve": "esbuild src/serve.ts --bundle --outfile=dist-serve/index.js --platform=node && node dist-serve/index.js"
+    "serve": "nodemon src/serve.ts"
   },
   "author": "",
   "license": "ISC",
@@ -16,5 +16,8 @@
     "@types/node": "^16.11.0",
     "esbuild": "^0.13.8",
     "typescript": "^4.4.4"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.14"
   }
 }
