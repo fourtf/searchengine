@@ -2,6 +2,12 @@ import { createServer, IncomingMessage, ServerResponse } from "http";
 import { handler } from "./index";
 
 const port = process.env.PORT || 3333;
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "Origin, X-Requested-With, Content-Type, Accept",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+};
 
 const server = createServer(
   async (req: IncomingMessage, res: ServerResponse) => {
@@ -29,7 +35,11 @@ const server = createServer(
         } as any,
       });
 
-      res.writeHead(x.statusCode, "", headersToString(x.headers ?? {}));
+      res.writeHead(
+        x.statusCode,
+        "",
+        headersToString({ ...corsHeaders, ...(x.headers ?? {}) })
+      );
       res.write(x.body ?? "");
       res.end();
     } catch (e) {
