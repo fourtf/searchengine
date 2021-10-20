@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
+    "start": "nodemon src/serve.ts",
     "build": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=node",
     "watch": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=node --watch ",
-    "query": "esbuild src/cli.ts   --bundle --outfile=dist-cli/index.js --platform=node && node dist-cli/index.js",
-    "serve": "nodemon src/serve.ts"
+    "query": "esbuild src/cli.ts   --bundle --outfile=dist-cli/index.js --platform=node && node dist-cli/index.js"
   },
   "author": "",
   "license": "ISC",
