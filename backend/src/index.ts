@@ -90,5 +90,25 @@ export const handler = async (
     return okJson({items: await search(query)});
   }
 
+  if (method === 'GET') {
+    switch(path) {
+      case '/songs':
+        return okJson(await count());
+      case '/typing':
+        const { text } = event.queryStringParameters ?? {};
+        assertString(text, "text");
+
+        return okJson({items: await typing(text)});
+      case '/search':
+        const { query, next } = event.queryStringParameters ?? {};
+        assertString(query, "query");
+
+        if (next) {
+          return okJson({items: await scroll(next)});
+        }
+        return okJson({items: await search(query)});
+    }
+  }
+
   return okJson(event);
 };
