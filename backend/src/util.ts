@@ -22,3 +22,7 @@ export function okJson(t: any): APIGatewayProxyResult {
     headers: { "Content-Type": "application/json" },
   };
 }
+
+export function arrayUnique<T>(xs: T[]): T[] {
+  return Array.from(new Set(xs));
+}
