@@ -8,12 +8,16 @@ import Autocomplete, {
 import React from "react";
 import IconButton from "@mui/material/IconButton";
 import { typing as apiTyping } from "../api";
+import { isSearchingState, performSearch } from "../search";
+import { useHookstate } from "@hookstate/core";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export function SearchInput(props: any) {
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState<string[]>([]);
   const loading = open && options.length === 0;
-  const [content, setContent] = useState("");
+  const [query, setQuery] = useState("");
+  const isSearching = useHookstate(isSearchingState);
 
   useEffect(() => {
     let active = true;
@@ -24,43 +28,20 @@ export function SearchInput(props: any) {
 
     (async () => {
       if (active) {
-        setOptions(await getAutocompleteOptions(content));
+        setOptions(await getAutocompleteOptions(query));
       }
     })();
 
     return () => {
       active = false;
     };
-  }, [loading, content]);
+  }, [loading, query]);
 
   useEffect(() => {
     if (!open) {
       setOptions([]);
     }
   }, [open]);
-
-  const render = (params: AutocompleteRenderInputParams) => (
-    <TextField
-      {...params}
-      InputProps={{
-        ...params.InputProps,
-        sx: { paddingRight: "9px !important" },
-        startAdornment: <SearchIcon sx={{ marginLeft: 1, marginRight: 1 }} />,
-        endAdornment: (
-          <React.Fragment>
-            <IconButton sx={{ opacity: content.length > 0 ? 1 : 0 }}>
-              <EastIcon />
-            </IconButton>
-          </React.Fragment>
-        ),
-        autoFocus: true,
-      }}
-      value={content}
-      onChange={(
-        e,
-      ) => setContent(e.target.value)}
-    />
-  );
 
   return (
     <Autocomplete
@@ -73,10 +54,51 @@ export function SearchInput(props: any) {
       getOptionLabel={(option) => option}
       options={options}
       loading={loading}
-      renderInput={render}
+      renderInput={Input}
       freeSolo={true}
     />
   );
+
+  function go() {
+    performSearch({ query });
+  }
+
+  function Input(params: AutocompleteRenderInputParams) {
+    return (
+      <TextField
+        {...params}
+        InputProps={{
+          ...params.InputProps,
+          sx: { paddingRight: "9px !important" },
+          startAdornment: <SearchIcon sx={{ marginLeft: 1, marginRight: 1 }} />,
+          endAdornment: <GoButton />,
+          autoFocus: true,
+        }}
+        value={query}
+        onChange={(
+          e,
+        ) => setQuery(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            go();
+          }
+        }}
+      />
+    );
+  }
+
+  function GoButton() {
+    return (
+      <React.Fragment>
+        <IconButton
+          sx={{ opacity: query.length > 0 ? 1 : 0 }}
+          onClick={go}
+        >
+          {isSearching.get() ? <CircularProgress size={24} /> : <EastIcon />}
+        </IconButton>
+      </React.Fragment>
+    );
+  }
 }
 
 async function getAutocompleteOptions(value: string): Promise<string[]> {

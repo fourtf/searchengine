@@ -1,3 +1,5 @@
+import { SearchQuery, SearchResult } from "./search";
+
 const apiUrl =
   window.location.host ===
   "hka-gruppe11-frontend.s3-website-us-east-1.amazonaws.com"
@@ -13,4 +15,18 @@ export async function typing(text: string): Promise<string[]> {
   }).then((x) => x.json());
 
   return res.items;
+}
+
+export async function search(query: SearchQuery): Promise<SearchResult> {
+  const res = await fetch(
+    `${apiUrl}/search?query=${encodeURIComponent(query.query)}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  ).then((x) => x.json());
+
+  return res;
 }

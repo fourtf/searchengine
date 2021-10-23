@@ -50,7 +50,7 @@ export default function SearchComponent() {
         </Box>
       </Card>
 
-      <Card>
+      <Card sx={{ marginTop: 4 }}>
         <SearchResults />
       </Card>
     </Box>
