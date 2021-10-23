@@ -1,6 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { Client } from "@elastic/elasticsearch";
 import { arrayUnique, assertObject, assertString, okJson } from "./util";
+import { ok } from "assert";
 
 const client = new Client({ node: "http://node-1.hska.io:9200/" });
 var autoFuzzy = true;
@@ -52,10 +53,59 @@ async function search(
     },
   });
 
-  return {
-    next_page: body._scroll_id,
-    data: body.hits.hits.map((hit) => hit.fields.name),
-  };
+  return body.hits.hits.map((hit) => hit.fields.name);
+}
+
+async function msearch(text: string, pageno: number): Promise<Record<string, any>> {
+  const { body } = await client.msearch({
+    index: "songs",
+    body: [
+      { },
+      {
+        from: (pageno - 1) * 10, size: 9, fields: ["name", "id"], _source: false,
+        query: {
+          match: {
+            name: {
+              query: text,
+              fuzziness: autoFuzzy ? "AUTO" : "0",
+            }
+          }
+        }
+      },
+      { },
+      {
+        from: (pageno - 1) * 10, size: 9, fields: ["name", "id"], _source: false,
+        query: {
+          match: {
+            artists: {
+              query: text,
+              fuzziness: autoFuzzy ? "AUTO" : "0",
+            }
+          }
+        }
+      },
+      { },
+      {
+        from: (pageno - 1) * 10, size: 9, fields: ["name", "id"], _source: false,
+        query: {
+          match: {
+            album: {
+              query: text,
+              fuzziness: autoFuzzy ? "AUTO" : "0",
+            }
+          }
+        }
+      }
+    ]
+  });
+
+  const resp = {
+    byName: body.responses[0].hits.hits.map((hit) => hit.fields),
+    byArtists: body.responses[1].hits.hits.map((hit) => hit.fields),
+    byAlbum: body.responses[2].hits.hits.map((hit) => hit.fields)
+  }
+
+  return resp;
 }
 
 export const handler = async (
@@ -69,23 +119,22 @@ export const handler = async (
   if (method === "GET") {
     switch (path) {
       case "/songs":
-        return okJson(await count());
+        return okJson(await msearch("Gunna", 1));
       case "/typing":
         const { text } = event.queryStringParameters ?? {};
         assertString(text, "text");
         return okJson({ items: await typing(text) });
       case "/search":
-        // const { query, p } = event.queryStringParameters ?? {};
-        // assertString(query, "query");
-        // const pageno = p ? parseInt(p) : 1;
+        const { query, p } = event.queryStringParameters ?? {};
+        assertString(query, "query");
+        const pageno = p ? parseInt(p) : 1;
 
-        // return okJson({ items: await search(query, pageno) });
-
-        return okJson({
-          byName: [{ name: "asdf", id: "1" }],
-          byArtist: [{ name: "asdf", id: "1" }],
-          byAlbum: [{ name: "asdf", id: "1" }],
-        });
+        // return okJson({
+          // byName: [{ name: "asdf", id: "1" }],
+          // byArtist: [{ name: "asdf", id: "1" }],
+          // byAlbum: [{ name: "asdf", id: "1" }],
+        // });
+        return okJson(await msearch(query, pageno));
     }
   }
 
