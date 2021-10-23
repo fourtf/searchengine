@@ -82,9 +82,9 @@ export const handler = async (
         // return okJson({ items: await search(query, pageno) });
 
         return okJson({
-          byName: [{ name: "asdf" }],
-          byArtist: [{ name: "asdf" }],
-          byAlbum: [{ name: "asdf" }],
+          byName: [{ name: "asdf", id: "1" }],
+          byArtist: [{ name: "asdf", id: "1" }],
+          byAlbum: [{ name: "asdf", id: "1" }],
         });
     }
   }

@@ -5,21 +5,19 @@ export interface SearchQuery {
   query: string;
 }
 
-export interface Song {}
+export interface Song {
+  name: string;
+  id: string;
+}
 
 export interface SearchResult {
-  songs: Song[];
-  artists: Song[];
-  albums: Song[];
+  byName: Song[];
+  byArtist: Song[];
+  byAlbum: Song[];
 }
 
 export const isSearchingState = createState(false);
-
-export const searchResultState = createState<SearchResult>({
-  songs: [],
-  artists: [],
-  albums: [],
-});
+export const searchResultState = createState<SearchResult | null>(null);
 
 let currentQuery = "";
 

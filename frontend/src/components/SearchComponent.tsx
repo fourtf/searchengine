@@ -5,14 +5,19 @@ import Logo from "./Logo";
 import useTheme from "@mui/material/styles/useTheme";
 import { SearchInput } from "./SearchInput";
 import SearchResults from "./SearchResults";
+import { useHookstate } from "@hookstate/core";
+import { searchResultState } from "../search";
+import { Fragment } from "react";
 
 export default function SearchComponent() {
   const theme = useTheme();
+  const results = useHookstate(searchResultState);
 
   return (
     <Box
       sx={{
-        marginTop: 20,
+        transition: "all 0.2s ease-out",
+        marginTop: results.get() === null ? 16 : 4,
         [theme.breakpoints.down("sm")]: {
           marginTop: 2,
         },
@@ -50,9 +55,9 @@ export default function SearchComponent() {
         </Box>
       </Card>
 
-      <Card sx={{ marginTop: 4 }}>
-        <SearchResults />
-      </Card>
+      {results.get() === null
+        ? <Fragment />
+        : <SearchResults sx={{ marginTop: 2 }} />}
     </Box>
   );
 }

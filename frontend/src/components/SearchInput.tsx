@@ -89,14 +89,12 @@ export function SearchInput(props: any) {
 
   function GoButton() {
     return (
-      <React.Fragment>
-        <IconButton
-          sx={{ opacity: query.length > 0 ? 1 : 0 }}
-          onClick={go}
-        >
-          {isSearching.get() ? <CircularProgress size={24} /> : <EastIcon />}
-        </IconButton>
-      </React.Fragment>
+      <IconButton
+        sx={{ opacity: query.length > 0 ? 1 : 0 }}
+        onClick={go}
+      >
+        {isSearching.get() ? <CircularProgress size={24} /> : <EastIcon />}
+      </IconButton>
     );
   }
 }
