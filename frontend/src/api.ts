@@ -1,0 +1,16 @@
+const apiUrl =
+  window.location.host ===
+  "hka-gruppe11-frontend.s3-website-us-east-1.amazonaws.com"
+    ? "https://kjcedq2g36.execute-api.us-east-1.amazonaws.com"
+    : "http://localhost:3333";
+
+export async function typing(text: string): Promise<string[]> {
+  const res = await fetch(`${apiUrl}/typing?text=${encodeURIComponent(text)}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  }).then((x) => x.json());
+
+  return res.items;
+}
