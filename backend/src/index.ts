@@ -27,7 +27,7 @@ async function typing(text: string): Promise<string[]> {
     },
   });
 
-  return body.hits.hits.map((hit) => hit.fields.name);
+  return body.hits.hits.map((hit) => hit.fields.name).flat();
 }
 
 async function search(text: string, pageno: number): Promise<Record<string, any>> {
