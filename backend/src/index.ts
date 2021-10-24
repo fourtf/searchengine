@@ -1,7 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { Client } from "@elastic/elasticsearch";
-import { arrayUnique, assertObject, assertString, okJson } from "./util";
-import { ok } from "assert";
+import { arrayUnique, assertObject, assertString, okJson, stringifyArrays } from "./util";
 
 const client = new Client({ node: "http://node-1.hska.io:9200/" });
 var autoFuzzy = true;
@@ -62,7 +61,7 @@ async function msearch(text: string, pageno: number): Promise<Record<string, any
     body: [
       { },
       {
-        from: (pageno - 1) * 10, size: 9, fields: ["name", "id"], _source: false,
+        from: (pageno - 1) * 10, size: 9, fields: ["name", "id", "album"], _source: false,
         query: {
           match: {
             name: {
@@ -74,7 +73,7 @@ async function msearch(text: string, pageno: number): Promise<Record<string, any
       },
       { },
       {
-        from: (pageno - 1) * 10, size: 9, fields: ["name", "id"], _source: false,
+        from: (pageno - 1) * 10, size: 9, fields: ["name", "id", "album"], _source: false,
         query: {
           match: {
             artists: {
@@ -86,7 +85,7 @@ async function msearch(text: string, pageno: number): Promise<Record<string, any
       },
       { },
       {
-        from: (pageno - 1) * 10, size: 9, fields: ["name", "id"], _source: false,
+        from: (pageno - 1) * 10, size: 9, fields: ["name", "id", "album"], _source: false,
         query: {
           match: {
             album: {
@@ -100,9 +99,9 @@ async function msearch(text: string, pageno: number): Promise<Record<string, any
   });
 
   const resp = {
-    byName: body.responses[0].hits.hits.map((hit) => hit.fields),
-    byArtists: body.responses[1].hits.hits.map((hit) => hit.fields),
-    byAlbum: body.responses[2].hits.hits.map((hit) => hit.fields)
+    byName: body.responses[0].hits.hits.map((hit) => stringifyArrays(hit.fields)),
+    byArtists: body.responses[1].hits.hits.map((hit) => stringifyArrays(hit.fields)),
+    byAlbum: body.responses[2].hits.hits.map((hit) => stringifyArrays(hit.fields))
   }
 
   return resp;
@@ -129,11 +128,11 @@ export const handler = async (
         assertString(query, "query");
         const pageno = p ? parseInt(p) : 1;
 
-        // return okJson({
-          // byName: [{ name: "asdf", id: "1" }],
-          // byArtist: [{ name: "asdf", id: "1" }],
-          // byAlbum: [{ name: "asdf", id: "1" }],
-        // });
+        // Returns in format {
+          // byName: [{name: ["xyz"], id: ["123"]}],
+          // byArtists: [{name: ["xyz"], id: ["123"]}],
+          // byAlbum: [{name: ["xyz"], id: ["123"]}]
+        // }
         return okJson(await msearch(query, pageno));
     }
   }
