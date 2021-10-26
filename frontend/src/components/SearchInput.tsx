@@ -15,27 +15,14 @@ import CircularProgress from "@mui/material/CircularProgress";
 export function SearchInput(props: any) {
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState<string[]>([]);
-  const loading = open && options.length === 0;
   const [query, setQuery] = useState("");
   const isSearching = useHookstate(isSearchingState);
 
   useEffect(() => {
-    let active = true;
-
-    if (!loading) {
-      return undefined;
-    }
-
     (async () => {
-      if (active) {
-        setOptions(await getAutocompleteOptions(query));
-      }
+      setOptions(await getAutocompleteOptions(query));
     })();
-
-    return () => {
-      active = false;
-    };
-  }, [loading, query]);
+  }, [query]);
 
   useEffect(() => {
     if (!open) {
@@ -53,7 +40,6 @@ export function SearchInput(props: any) {
       isOptionEqualToValue={(option, value) => option === value}
       getOptionLabel={(option) => option}
       options={options}
-      loading={loading}
       renderInput={Input}
       freeSolo={true}
     />
