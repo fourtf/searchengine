@@ -8,11 +8,13 @@ export interface SearchQuery {
 export interface Song {
   name: string;
   id: string;
+  album: string;
+  artists: string[];
 }
 
 export interface SearchResult {
   byName: Song[];
-  byArtist: Song[];
+  byArtists: Song[];
   byAlbum: Song[];
 }
 
