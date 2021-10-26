@@ -27,7 +27,7 @@ export function arrayUnique<T>(xs: T[]): T[] {
   return Array.from(new Set(xs));
 }
 
-export function stringifyArrays(a: any[]): any {
+export function stringifyArrays(a: Record<string, string[]>[]): any[] {
   Object.keys(a).forEach(function(key) {
     a[key] = a[key] instanceof Array ? a[key].join() : a[key];
   });

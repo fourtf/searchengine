@@ -61,7 +61,7 @@ async function msearch(text: string, pageno: number): Promise<Record<string, any
     body: [
       { },
       {
-        from: (pageno - 1) * 10, size: 9, fields: ["name", "id", "album"], _source: false,
+        from: (pageno - 1) * 10, size: 9, fields: ["name", "id", "album", "artists"], _source: false,
         query: {
           match: {
             name: {
@@ -73,7 +73,7 @@ async function msearch(text: string, pageno: number): Promise<Record<string, any
       },
       { },
       {
-        from: (pageno - 1) * 10, size: 9, fields: ["name", "id", "album"], _source: false,
+        from: (pageno - 1) * 10, size: 9, fields: ["name", "id", "album", "artists"], _source: false,
         query: {
           match: {
             artists: {
@@ -85,7 +85,7 @@ async function msearch(text: string, pageno: number): Promise<Record<string, any
       },
       { },
       {
-        from: (pageno - 1) * 10, size: 9, fields: ["name", "id", "album"], _source: false,
+        from: (pageno - 1) * 10, size: 9, fields: ["name", "id", "album", "artists"], _source: false,
         query: {
           match: {
             album: {
@@ -129,9 +129,9 @@ export const handler = async (
         const pageno = p ? parseInt(p) : 1;
 
         // Returns in format {
-          // byName: [{name: ["xyz"], id: ["123"]}],
-          // byArtists: [{name: ["xyz"], id: ["123"]}],
-          // byAlbum: [{name: ["xyz"], id: ["123"]}]
+          // byName: [{name: "xyz", id: "123"}],
+          // byArtists: [{name: "xyz", id: "123"}],
+          // byAlbum: [{name: "xyz", id: "123"}]
         // }
         return okJson(await msearch(query, pageno));
     }
