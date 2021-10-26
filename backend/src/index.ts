@@ -3,6 +3,7 @@ import { Client } from "@elastic/elasticsearch";
 import { arrayUnique, assertObject, assertString, okJson, stringifyArrays } from "./util";
 
 const client = new Client({ node: "http://node-1.hska.io:9200/" });
+const index = "songsv2";
 var autoFuzzy = true;
 
 async function count() {
@@ -15,7 +16,7 @@ async function count() {
 
 async function typing(text: string): Promise<string[]> {
   const { body } = await client.search({
-    index: "songs",
+    index: index,
     body: {
       query: {
         match_phrase_prefix: {
@@ -35,7 +36,7 @@ async function search(
   pageno: number
 ): Promise<Record<string, any>> {
   const { body } = await client.search({
-    index: "songs",
+    index: index,
     from: (pageno - 1) * 10,
     size: 9,
     body: {
@@ -57,7 +58,7 @@ async function search(
 
 async function msearch(text: string, pageno: number): Promise<Record<string, any>> {
   const { body } = await client.msearch({
-    index: "songs",
+    index: index,
     body: [
       { },
       {
@@ -97,6 +98,8 @@ async function msearch(text: string, pageno: number): Promise<Record<string, any
       }
     ]
   });
+
+  body.responses[1].hits.hits.forEach(hit => console.log(hit.fields));
 
   const resp = {
     byName: body.responses[0].hits.hits.map((hit) => stringifyArrays(hit.fields)),
