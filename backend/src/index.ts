@@ -94,17 +94,29 @@ async function msearch(text: string, pageno: number): Promise<Record<string, any
               fuzziness: autoFuzzy ? "AUTO" : "0",
             }
           }
+        },
+        aggs: {
+          albums: {
+            terms: { "field": "album_id", size: 9},
+            aggs: {
+              relevant: {
+                top_hits: {
+                  size: 1,
+                  _source: false,
+                  fields: [ "album", "artists" ]
+                }
+              }
+            }
+          }
         }
       }
     ]
   });
 
-  body.responses[1].hits.hits.forEach(hit => console.log(hit.fields));
-
   const resp = {
     byName: body.responses[0].hits.hits.map((hit) => stringifyArrays(hit.fields)),
     byArtists: body.responses[1].hits.hits.map((hit) => stringifyArrays(hit.fields)),
-    byAlbum: body.responses[2].hits.hits.map((hit) => stringifyArrays(hit.fields))
+    byAlbum: body.responses[2].aggregations.albums.buckets.flatMap(bucket => bucket.relevant.hits.hits.map(hit => stringifyArrays(hit.fields)))
   }
 
   return resp;
