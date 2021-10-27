@@ -64,11 +64,34 @@ async function msearch(text: string, pageno: number): Promise<Record<string, any
       {
         from: (pageno - 1) * 10, size: 9, fields: ["name", "id", "album", "artists"], _source: false,
         query: {
-          match: {
-            name: {
-              query: text,
-              fuzziness: autoFuzzy ? "AUTO" : "0",
-            }
+          bool: {
+            should: [
+              {
+                match: {
+                  name: {
+                    query: text,
+                    fuzziness: autoFuzzy ? "AUTO" : "0"
+                  }
+                }
+              },
+              {
+                match: {
+                  name: {
+                    query: text,
+                    fuzziness: autoFuzzy ? "AUTO" : "0",
+                    operator: "and"
+                  }
+                }
+              },
+              {
+                match_phrase: {
+                  name: {
+                    query: text,
+                    boost: 2
+                  }
+                }
+              }
+            ]
           }
         }
       },
