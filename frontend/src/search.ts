@@ -10,12 +10,20 @@ export interface Song {
   id: string;
   album: string;
   artists: string[];
+  coverUrl?: string;
+}
+
+export interface Album {
+  name: string;
+  songId: string;
+  artists: string[];
+  coverUrl?: string;
 }
 
 export interface SearchResult {
   byName: Song[];
   byArtists: Song[];
-  byAlbum: Song[];
+  byAlbum: Album[];
 }
 
 export const isSearchingState = createState(false);

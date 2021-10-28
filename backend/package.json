@@ -14,7 +14,10 @@
     "@elastic/elasticsearch": "^7.15.0",
     "@types/aws-lambda": "^8",
     "@types/node": "^16.11.0",
+    "@types/spotify-web-api-node": "^5.0.3",
+    "dotenv": "^10.0.0",
     "esbuild": "^0.13.8",
+    "spotify-web-api-node": "^5.0.2",
     "ts-node": "^10.3.0",
     "typescript": "^4.4.4"
   },

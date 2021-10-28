@@ -6,3 +6,4 @@ dev.js
 dist/
 dist-cli/
 dist-serve/
+.env

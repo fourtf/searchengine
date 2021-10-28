@@ -1,12 +1,11 @@
 import { useHookstate } from "@hookstate/core";
 import { Box, Card, Paper, Typography } from "@mui/material";
-import { searchResultState, Song } from "../search";
-import { justifyCenter } from "../util";
+import { Fragment } from "react";
+import { Album, searchResultState, Song } from "../search";
+import Image from "./Image";
 
 export default function SearchResults(props: any) {
   const res = useHookstate(searchResultState);
-
-  console.log(res.get()?.byArtists);
 
   return (
     <Box {...props}>
@@ -26,7 +25,7 @@ export default function SearchResults(props: any) {
           ["> *"]: { marginRight: 2 },
         }}
       >
-        {(res.get()?.byArtists ?? []).map((x) => <Artist key={x.id} {...x} />)}
+        {(res.get()?.byArtists ?? []).map((x) => <Artist_ key={x.id} {...x} />)}
       </Category>
       <Category
         title="Albums"
@@ -36,7 +35,12 @@ export default function SearchResults(props: any) {
           ["> *"]: { marginRight: 2 },
         }}
       >
-        {(res.get()?.byAlbum ?? []).map((x) => <Album key={x.id} {...x} />)}
+        {(res.get()?.byAlbum ?? []).map((x) => (
+          <Album_
+            key={x.songId}
+            {...x}
+          />
+        ))}
       </Category>
     </Box>
   );
@@ -64,22 +68,29 @@ function Category(
   );
 }
 
-function Song_({ name, artists, album }: Song) {
+function Song_({ name, artists, album, coverUrl }: Song) {
   return (
     <Box sx={{ display: "flex", flexDirection: "row" }}>
       <Paper
         square
         elevation={3}
-        sx={{ width: 48, height: 48, marginRight: 2 }}
+        sx={{ width: 48, height: 48, marginRight: 2, flexShrink: 0 }}
       >
-        <svg
-          width="128"
-          height="128"
-          viewBox="0 0 128 128"
+        <Image
+          src={coverUrl}
+          alt={name}
           style={{ width: "100%", height: "100%" }}
-        >
-          <circle cx="64" cy="64" r="58" fill="#f5f5f5" />
-        </svg>
+          loadingElement={
+            <svg
+              width="128"
+              height="128"
+              viewBox="0 0 128 128"
+              style={{ width: "100%", height: "100%" }}
+            >
+              <circle cx="64" cy="64" r="58" fill="#f5f5f5" />
+            </svg>
+          }
+        />
       </Paper>
       <Box>
         <Box sx={{}}>
@@ -93,13 +104,24 @@ function Song_({ name, artists, album }: Song) {
   );
 }
 
-function Artist({ artists }: Song) {
+function Artist_({ artists, coverUrl }: Song) {
+  const size = 128;
+
   return (
     <Box>
       <Paper
         elevation={3}
-        sx={{ width: 128, height: 128, marginBottom: 2, borderRadius: 32 }}
+        sx={{ width: size, height: size, marginBottom: 2, borderRadius: 32 }}
       >
+        <Image
+          src={coverUrl}
+          alt={artists.join(", ")}
+          style={{
+            width: "100%",
+            height: "100%",
+            clipPath: "circle(60px at center)",
+          }}
+        />
       </Paper>
       <Box sx={{ textAlign: "center" }}>
         {artists.join(", ")}
@@ -108,7 +130,9 @@ function Artist({ artists }: Song) {
   );
 }
 
-function Album({ album, artists }: Song) {
+function Album_({ name, artists, coverUrl }: Album) {
+  const size = 128;
+
   return (
     <Box>
       <Paper
@@ -116,12 +140,19 @@ function Album({ album, artists }: Song) {
         elevation={3}
         sx={{ width: 128, height: 128, marginBottom: 2 }}
       >
-        <svg width="128" height="128">
-          <circle cx="64" cy="64" r="58" fill="#f5f5f5" />
-        </svg>
+        <Image
+          src={coverUrl}
+          alt={name}
+          style={{ width: "100%", height: "100%" }}
+          loadingElement={
+            <svg width={size} height={size}>
+              <circle cx="64" cy="64" r="58" fill="#f5f5f5" />
+            </svg>
+          }
+        />
       </Paper>
       <Box sx={{ textAlign: "center" }}>
-        {album}
+        {name}
       </Box>
       <Box sx={{ textAlign: "center", color: "#999" }}>
         {artists.join(", ")}

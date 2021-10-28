@@ -1,3 +1,6 @@
+import { config as dotenv } from 'dotenv';
+dotenv();
+// ORDER IMPORTANT
 import { createServer, IncomingMessage, ServerResponse } from "http";
 import { handler } from "./index";
 
