@@ -1,8 +1,7 @@
 import { SearchQuery, SearchResult } from "./search";
 
 const apiUrl =
-  window.location.host ===
-  "hka-gruppe11-frontend.s3-website-us-east-1.amazonaws.com"
+  /aws|schnabel/.test(window.location.host)
     ? "https://kjcedq2g36.execute-api.us-east-1.amazonaws.com"
     : "http://localhost:3333";
 
