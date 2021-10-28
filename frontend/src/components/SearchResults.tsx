@@ -1,9 +1,12 @@
 import { useHookstate } from "@hookstate/core";
 import { Box, Card, Paper, Typography } from "@mui/material";
+import { useTheme } from "@mui/system";
 import { Album, searchResultState, Song } from "../search";
+import Clamped from "./Clamped";
 import Image from "./Image";
 
 export default function SearchResults(props: any) {
+  const theme = useTheme();
   const res = useHookstate(searchResultState);
 
   return (
@@ -14,7 +17,7 @@ export default function SearchResults(props: any) {
           "> *:not(:first-of-type)": { marginTop: 2 },
         }}
       >
-        {(res.get()?.byName ?? []).map((x) => (
+        {(res.get()?.byName?.slice(0, 5) ?? []).map((x) => (
           <SongComponent key={x.id} {...x} />
         ))}
       </Category>
@@ -47,28 +50,37 @@ export default function SearchResults(props: any) {
       </Category>
     </Box>
   );
-}
 
-function Category(
-  { title, children, ...props }: {
-    title: string;
-    children: any;
-    [x: string]: any;
-  },
-) {
-  return (
-    <Card
-      sx={{ marginTop: 2, padding: 2, marginLeft: 4, marginRight: 4 }}
-    >
-      <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-        {title}
-      </Typography>
+  function Category(
+    { title, children, ...props }: {
+      title: string;
+      children: any;
+      [x: string]: any;
+    },
+  ) {
+    return (
+      <Card
+        sx={{
+          marginTop: 2,
+          padding: 2,
+          marginLeft: 4,
+          marginRight: 4,
+          [theme.breakpoints.down("sm")]: {
+            marginLeft: 0,
+            marginRight: 0,
+          },
+        }}
+      >
+        <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+          {title}
+        </Typography>
 
-      <Box {...props}>
-        {children}
-      </Box>
-    </Card>
-  );
+        <Box {...props}>
+          {children}
+        </Box>
+      </Card>
+    );
+  }
 }
 
 function SongComponent({ name, artists, album, coverUrl }: Song) {
@@ -96,12 +108,11 @@ function SongComponent({ name, artists, album, coverUrl }: Song) {
         />
       </Paper>
       <Box>
-        <Box sx={{}}>
-          {name}
-        </Box>
-        <Box sx={{ color: "#999" }}>
-          {artists.join(", ")} - {album}
-        </Box>
+        <Clamped text={name} maxLines={2} />
+        <Clamped
+          sx={{ color: "#999" }}
+          text={`${artists.join(", ")} - ${album}`}
+        />
       </Box>
     </Box>
   );
@@ -109,6 +120,7 @@ function SongComponent({ name, artists, album, coverUrl }: Song) {
 
 function ArtistComponent({ artists, coverUrl }: Song) {
   const size = 128;
+  const artist = artists[0] ?? "???";
 
   return (
     <Box>
@@ -118,7 +130,7 @@ function ArtistComponent({ artists, coverUrl }: Song) {
       >
         <Image
           src={coverUrl}
-          alt={artists.join(", ")}
+          alt={artist}
           style={{
             width: "100%",
             height: "100%",
@@ -127,7 +139,7 @@ function ArtistComponent({ artists, coverUrl }: Song) {
         />
       </Paper>
       <Box sx={{ textAlign: "center" }}>
-        {artists.join(", ")}
+        {artist}
       </Box>
     </Box>
   );
@@ -154,12 +166,15 @@ function AlbumComponent({ name, artists, coverUrl }: Album) {
           }
         />
       </Paper>
-      <Box sx={{ textAlign: "center" }}>
-        {name}
-      </Box>
-      <Box sx={{ textAlign: "center", color: "#999" }}>
-        {artists.join(", ")}
-      </Box>
+      <Clamped
+        sx={{ textAlign: "center" }}
+        text={name}
+        maxLines={2}
+      />
+      <Clamped
+        sx={{ textAlign: "center", color: "#999" }}
+        text={artists.join(", ")}
+      />
     </Box>
   );
 }
