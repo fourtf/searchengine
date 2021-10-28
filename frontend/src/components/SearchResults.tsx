@@ -1,6 +1,5 @@
 import { useHookstate } from "@hookstate/core";
 import { Box, Card, Paper, Typography } from "@mui/material";
-import { Fragment } from "react";
 import { Album, searchResultState, Song } from "../search";
 import Image from "./Image";
 
@@ -12,31 +11,35 @@ export default function SearchResults(props: any) {
       <Category
         title="Songs"
         sx={{
-          ["> *:not(:first-child)"]: { marginTop: 2 },
+          "> *:not(:first-of-type)": { marginTop: 2 },
         }}
       >
-        {(res.get()?.byName ?? []).map((x) => <Song_ key={x.id} {...x} />)}
+        {(res.get()?.byName ?? []).map((x) => (
+          <SongComponent key={x.id} {...x} />
+        ))}
       </Category>
       <Category
         title="Artists"
         sx={{
           display: "flex",
           flexDirection: "row",
-          ["> *"]: { marginRight: 2 },
+          "> *": { marginRight: 2 },
         }}
       >
-        {(res.get()?.byArtists ?? []).map((x) => <Artist_ key={x.id} {...x} />)}
+        {(res.get()?.byArtists ?? []).map((x) => (
+          <ArtistComponent key={x.id} {...x} />
+        ))}
       </Category>
       <Category
         title="Albums"
         sx={{
           display: "flex",
           flexDirection: "row",
-          ["> *"]: { marginRight: 2 },
+          "> *": { marginRight: 2 },
         }}
       >
         {(res.get()?.byAlbum ?? []).map((x) => (
-          <Album_
+          <AlbumComponent
             key={x.songId}
             {...x}
           />
@@ -68,7 +71,7 @@ function Category(
   );
 }
 
-function Song_({ name, artists, album, coverUrl }: Song) {
+function SongComponent({ name, artists, album, coverUrl }: Song) {
   return (
     <Box sx={{ display: "flex", flexDirection: "row" }}>
       <Paper
@@ -104,7 +107,7 @@ function Song_({ name, artists, album, coverUrl }: Song) {
   );
 }
 
-function Artist_({ artists, coverUrl }: Song) {
+function ArtistComponent({ artists, coverUrl }: Song) {
   const size = 128;
 
   return (
@@ -130,7 +133,7 @@ function Artist_({ artists, coverUrl }: Song) {
   );
 }
 
-function Album_({ name, artists, coverUrl }: Album) {
+function AlbumComponent({ name, artists, coverUrl }: Album) {
   const size = 128;
 
   return (
