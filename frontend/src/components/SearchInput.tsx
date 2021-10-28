@@ -86,5 +86,10 @@ export function SearchInput(props: any) {
 }
 
 async function getAutocompleteOptions(value: string): Promise<string[]> {
-  return await apiTyping(value);
+  try {
+    return await apiTyping(value);
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
 }

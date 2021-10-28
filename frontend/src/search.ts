@@ -37,11 +37,15 @@ export function performSearch(query: SearchQuery) {
   isSearchingState.set(true);
 
   (async () => {
-    const res = await search(query);
+    try {
+      const res = await search(query);
 
-    if (q === currentQuery) {
-      isSearchingState.set(false);
-      searchResultState.set(res);
+      if (q === currentQuery) {
+        isSearchingState.set(false);
+        searchResultState.set(res);
+      }
+    } catch (e) {
+      console.error(e);
     }
   })();
 }
