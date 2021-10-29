@@ -1,86 +1,44 @@
 import { useHookstate } from "@hookstate/core";
-import { Box, Card, Paper, Typography } from "@mui/material";
+import { Avatar, Box, Paper } from "@mui/material";
 import { useTheme } from "@mui/system";
 import { Album, searchResultState, Song } from "../search";
 import Clamped from "./Clamped";
 import Image from "./Image";
+import { SearchResultItems } from "./SearchResultItems";
+
+const size = "128px";
+const sizeSm = "96px";
 
 export default function SearchResults(props: any) {
-  const theme = useTheme();
   const res = useHookstate(searchResultState);
 
   return (
     <Box {...props}>
-      <Category
-        title="Songs"
-        sx={{
-          "> *:not(:first-of-type)": { marginTop: 2 },
-        }}
-      >
-        {(res.get()?.byName?.slice(0, 5) ?? []).map((x) => (
-          <SongComponent key={x.id} {...x} />
-        ))}
-      </Category>
-      <Category
+      <SearchResultItems
+        items={res.get()?.byName ?? []}
+        title={"Songs"}
+        isColumn={true}
+        ItemComponent={SongComponent}
+        getItemKey={(x) => x.id}
+      />
+
+      <SearchResultItems
+        items={res.get()?.byArtists ?? []}
         title="Artists"
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          "> *": { marginRight: 2 },
-        }}
-      >
-        {(res.get()?.byArtists ?? []).map((x) => (
-          <ArtistComponent key={x.id} {...x} />
-        ))}
-      </Category>
-      <Category
+        isColumn={false}
+        ItemComponent={ArtistComponent}
+        getItemKey={(x) => x.id}
+      />
+
+      <SearchResultItems
+        items={res.get()?.byAlbum ?? []}
         title="Albums"
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          "> *": { marginRight: 2 },
-        }}
-      >
-        {(res.get()?.byAlbum ?? []).map((x) => (
-          <AlbumComponent
-            key={x.songId}
-            {...x}
-          />
-        ))}
-      </Category>
+        isColumn={false}
+        ItemComponent={AlbumComponent}
+        getItemKey={(x) => x.songId}
+      />
     </Box>
   );
-
-  function Category(
-    { title, children, ...props }: {
-      title: string;
-      children: any;
-      [x: string]: any;
-    },
-  ) {
-    return (
-      <Card
-        sx={{
-          marginTop: 2,
-          padding: 2,
-          marginLeft: 4,
-          marginRight: 4,
-          [theme.breakpoints.down("sm")]: {
-            marginLeft: 0,
-            marginRight: 0,
-          },
-        }}
-      >
-        <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-          {title}
-        </Typography>
-
-        <Box {...props}>
-          {children}
-        </Box>
-      </Card>
-    );
-  }
 }
 
 function SongComponent({ name, artists, album, coverUrl }: Song) {
@@ -119,22 +77,44 @@ function SongComponent({ name, artists, album, coverUrl }: Song) {
 }
 
 function ArtistComponent({ artists, coverUrl }: Song) {
-  const size = 128;
+  const theme = useTheme();
+
   const artist = artists[0] ?? "???";
 
   return (
-    <Box>
+    <Box
+      sx={{
+        width: size,
+        marginTop: 2,
+
+        [theme.breakpoints.down("sm")]: {
+          width: sizeSm,
+        },
+      }}
+    >
       <Paper
         elevation={3}
-        sx={{ width: size, height: size, marginBottom: 2, borderRadius: 32 }}
+        sx={{
+          flexShrink: 0,
+          width: size,
+          height: size,
+          borderRadius: 32,
+          marginBottom: 2,
+
+          [theme.breakpoints.down("sm")]: {
+            width: sizeSm,
+            height: sizeSm,
+            marginRight: 2,
+          },
+        }}
       >
-        <Image
+        <Avatar
           src={coverUrl}
           alt={artist}
-          style={{
+          sx={{
+            flexShrink: 0,
             width: "100%",
             height: "100%",
-            clipPath: "circle(60px at center)",
           }}
         />
       </Paper>
@@ -146,24 +126,37 @@ function ArtistComponent({ artists, coverUrl }: Song) {
 }
 
 function AlbumComponent({ name, artists, coverUrl }: Album) {
-  const size = 128;
+  const theme = useTheme();
 
   return (
-    <Box>
+    <Box
+      sx={{
+        width: size,
+        marginTop: 2,
+
+        [theme.breakpoints.down("sm")]: {
+          width: sizeSm,
+        },
+      }}
+    >
       <Paper
         square
         elevation={3}
-        sx={{ width: 128, height: 128, marginBottom: 2 }}
+        sx={{
+          width: size,
+          height: size,
+          marginBottom: 2,
+
+          [theme.breakpoints.down("sm")]: {
+            width: sizeSm,
+            height: sizeSm,
+          },
+        }}
       >
-        <Image
+        <img
           src={coverUrl}
           alt={name}
           style={{ width: "100%", height: "100%" }}
-          loadingElement={
-            <svg width={size} height={size}>
-              <circle cx="64" cy="64" r="58" fill="#f5f5f5" />
-            </svg>
-          }
         />
       </Paper>
       <Clamped
