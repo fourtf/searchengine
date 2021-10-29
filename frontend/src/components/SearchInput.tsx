@@ -5,13 +5,9 @@ import { useEffect, useState } from "react";
 import Autocomplete, {
   AutocompleteRenderInputParams,
 } from "@mui/material/Autocomplete";
-import React from "react";
 import IconButton from "@mui/material/IconButton";
 import { typing as apiTyping } from "../api";
-import {
-  isSearchingState,
-  performGlobalSearch as performSearch,
-} from "../search";
+import { isSearchingState, performSearch } from "../search";
 import { useHookstate } from "@hookstate/core";
 import CircularProgress from "@mui/material/CircularProgress";
 
