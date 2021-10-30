@@ -42,10 +42,11 @@ async function searchSongsByField(field: string, text: string): Promise<Song[]> 
 }
 
 async function msearch(text: string, params: parameters): Promise<Record<string, any>> {
-  const { pageno, explicitFilter, yearFilter } = params;
+  const { pageno, explicitFilter, yearFilter, durationFilter } = params;
   const filter = [
     explicitFilter ? [{ "term": { "explicit": explicitFilter } }] : [],
-    yearFilter ? [{ "term": { "year": yearFilter } }] : []
+    yearFilter ? [{ "term": { "year": yearFilter } }] : [],
+    durationFilter ? [{ "range": { "duration_ms": { "gte": 0, "lte": durationFilter}}}] : []
   ].flat();
 
   const { body } = await client.msearch({
@@ -211,7 +212,8 @@ async function msearch(text: string, params: parameters): Promise<Record<string,
 interface parameters {
   pageno: number,
   explicitFilter: string,
-  yearFilter: string
+  yearFilter: string,
+  durationFilter: number
 }
 
 export const handler = async (
@@ -227,25 +229,21 @@ export const handler = async (
       case "/typing":
         const { text } = event.queryStringParameters ?? {};
         assertString(text, "text");
+
         return okJson({ items: await typing(text) });
       case "/search":
-        const { query, p, fExplicit, fYear } = event.queryStringParameters ?? {};
-        const params = { pageno: p ? parseInt(p) : 1, explicitFilter: fExplicit, yearFilter: fYear };
+        const { query, p, fExplicit, fYear, fDuration } = event.queryStringParameters ?? {};
+        const params = { pageno: p ? parseInt(p) : 1, explicitFilter: fExplicit, yearFilter: fYear, durationFilter: fDuration ? parseInt(fDuration) : 0 };
         assertString(query, "query");
 
-        // Returns in format {
-        // byName: [{name: "xyz", id: "123"}],
-        // byArtists: [{name: "xyz", id: "123"}],
-        // byAlbum: [{name: "xyz", id: "123"}]^^
-        // }
         return okJson(await msearch(query, params).then(tryAddCoverUrls));
       case "/songs":
         const { field, hit } = event.queryStringParameters ?? {};
         assertString(field, "field");
         assertString(hit, "hit");
+
         return okJson(await searchSongsByField(field, hit).then(tryAddCoverUrlsSongs));
     }
   }
-
   return okJson(event);
 };
