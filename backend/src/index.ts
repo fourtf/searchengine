@@ -3,6 +3,7 @@ import { Client } from "@elastic/elasticsearch";
 import { arrayUnique, assertIsAlbumArray, assertIsArtistArray, assertIsSongArray, assertObject, assertString, assertStringArray, okJson, stringifyArrays } from "./util";
 import { Album, Artist, SearchResult, Song } from "./shared";
 import { getCoverUrls } from "./spotify";
+import { release } from "os";
 
 const client = new Client({ node: "http://node-1.hska.io:9200/" });
 const index = "songsv2";
@@ -25,7 +26,7 @@ async function typing(text: string): Promise<string[]> {
   return arrayUnique(body.hits.hits.map((hit) => hit.fields.name).flat());
 }
 
-async function searchSongsByField(field: string, text: string,): Promise<Record<string, any>> {
+async function searchSongsByField(field: string, text: string): Promise<Record<string, any>> {
   const { body } = await client.search({
     index: index,
     body: {
@@ -41,11 +42,12 @@ async function searchSongsByField(field: string, text: string,): Promise<Record<
   return body.hits.hits.map((hit) => stringifyArrays(hit.fields));
 }
 
-async function msearch(text: string, pageno: number): Promise<SearchResult> {
-  const onlyExplicit = true;
-  const releaseDate = "2013-07-26";
+async function msearch(text: string, params: parameters): Promise<Record<string, any>> {
+  console.log(params);
+  const { pageno, explicitFilter, yearFilter } = params; 
   const filter = [
-    onlyExplicit ? [{ "term": { "explicit": "True" } }] : []
+    explicitFilter ? [{"term": {"explicit": explicitFilter}}] : [],
+    yearFilter ? [{"term": {"year": yearFilter}}] : []
   ].flat();
 
   const { body } = await client.msearch({
@@ -53,7 +55,7 @@ async function msearch(text: string, pageno: number): Promise<SearchResult> {
     body: [
       {}, // Query for song names
       {
-        from: (pageno - 1) * 10, size: 10, fields: ["name", "id", "album", "artists", "explicit"], _source: false,
+        from: (pageno - 1) * 10, size: 10, fields: ["name", "id", "album", "artists", "explicit", "year"], _source: false,
         query: {
           bool: {
             should: [
@@ -240,6 +242,12 @@ async function tryAddCoverUrls(obj: SearchResult): Promise<SearchResult> {
   }
 }
 
+interface parameters {
+  pageno: number,
+  explicitFilter: string,
+  yearFilter: string
+}
+
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
@@ -255,16 +263,16 @@ export const handler = async (
         assertString(text, "text");
         return okJson({ items: await typing(text) });
       case "/search":
-        const { query, p } = event.queryStringParameters ?? {};
+        const { query, p, fExplicit, fYear } = event.queryStringParameters ?? {};
+        const params = { pageno: p ? parseInt(p) : 1, explicitFilter: fExplicit, yearFilter: fYear};
         assertString(query, "query");
-        const pageno = p ? parseInt(p) : 1;
-
+        
         // Returns in format {
-        // songs: [{name: "xyz", id: "123"}],
-        // artists: [{name: "xyz", id: "123"}],
-        // albums: [{name: "xyz", id: "123"}]
+        // byName: [{name: "xyz", id: "123"}],
+        // byArtists: [{name: "xyz", id: "123"}],
+        // byAlbum: [{name: "xyz", id: "123"}]^^
         // }
-        return okJson(await msearch(query, pageno).then(tryAddCoverUrls));
+        return okJson(await msearch(query, params).then(tryAddCoverUrls));
       case "/songs":
         const { field, hit } = event.queryStringParameters ?? {};
         assertString(field, "field");
