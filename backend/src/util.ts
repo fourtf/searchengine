@@ -96,6 +96,7 @@ export function arrayUnique<T>(xs: T[]): T[] {
 }
 
 export function stringifyArrays(a: Record<string, string[]>[]): any[] {
+  console.log(a);
   Object.keys(a).forEach(function (key) {
     if (key !== "artists") {
       a[key] = a[key] instanceof Array ? a[key].join() : a[key];

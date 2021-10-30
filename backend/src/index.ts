@@ -37,16 +37,22 @@ async function searchSongsByField(field: string, text: string, ): Promise<Record
     }
   });
 
-  return body.hits.hits.map((hit) => hit.fields);
+  return body.hits.hits.map((hit) => stringifyArrays(hit.fields));
 }
 
 async function msearch(text: string, pageno: number): Promise<Record<string, any>> {
+  const onlyExplicit = true;
+  const releaseDate = "2013-07-26";
+  const filter = [
+    onlyExplicit ? [{"term": {"explicit": "True"}}] : []
+  ].flat();
+  
   const { body } = await client.msearch({
     index: index,
     body: [
       {}, // Query for song names
       {
-        from: (pageno - 1) * 10, size: 10, fields: ["name", "id", "album", "artists"], _source: false,
+        from: (pageno - 1) * 10, size: 10, fields: ["name", "id", "album", "artists", "explicit"], _source: false,
         query: {
           bool: {
             should: [
@@ -75,7 +81,8 @@ async function msearch(text: string, pageno: number): Promise<Record<string, any
                   }
                 }
               }
-            ]
+            ],
+            filter
           }
         }
       },
@@ -101,7 +108,8 @@ async function msearch(text: string, pageno: number): Promise<Record<string, any
                   }
                 }
               }
-            ]
+            ],
+            filter
           }
         },
         collapse: {
@@ -134,7 +142,8 @@ async function msearch(text: string, pageno: number): Promise<Record<string, any
                   }
                 }
               }
-            ]
+            ],
+            filter
           }
         },
         collapse: {
