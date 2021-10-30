@@ -1,4 +1,5 @@
 import SpotifyWebApi from 'spotify-web-api-node';
+import { Album, Artist, SearchResult, Song } from './shared';
 
 // MAKE CLIENT
 const canUseSpotify = process.env.SPOTIFY_CLIENT_ID && process.env.SPOTIFY_CLIENT_SECRET;
@@ -46,25 +47,48 @@ export async function getCoverUrls(songIds: string[]): Promise<{ [id: string]: s
     }));
 }
 
-// SERVER
-// const server = fastify()
+async function addCoverUrlsSearch(obj: SearchResult): Promise<SearchResult> {
+    const ids = [...obj.songs.map(x => x.id), ...obj.artists.map(x => x.songId), ...obj.albums.map(x => x.songId)];
+    const coversBySongId = await getCoverUrls(ids);
 
-// server.get('/cover', async (request, reply) => {
-//     const query = request.query;
-//     assertIsRecord(query);
-//     const { song_id } = query;
-//     assertIsStringOrStringArray(song_id);
+    if (ids.length === 0 || coversBySongId === null) {
+        return obj;
+    }
 
-//     const songIds = Array.isArray(song_id) ? song_id : [song_id];
-//     const url = await getSongCoverUrls(songIds);
+    function map<T extends Song | Album | Artist>(t: T): T {
+        return {
+            ...t,
+            coverUrl: coversBySongId["songId" in t ? t.songId : t.id]
+        };
 
-//     reply.code(200).send({ url });
-// })
+    }
 
-// server.listen(3334, (err, address) => {
-//     if (err) {
-//         console.error(err)
-//         process.exit(1)
-//     }
-//     console.log(`Server listening at ${address}`)
-// })
+    return {
+        songs: obj.songs.map(map),
+        artists: obj.artists.map(map),
+        albums: obj.albums.map(map),
+    };
+}
+
+export async function tryAddCoverUrls(obj: SearchResult): Promise<SearchResult> {
+    try {
+        return await addCoverUrlsSearch(obj);
+    } catch (e) {
+        console.error(e);
+        return obj;
+    }
+}
+
+
+export async function tryAddCoverUrlsSongs(songs: Song[]): Promise<Song[]> {
+    try {
+        return await tryAddCoverUrls({
+            songs,
+            artists: [],
+            albums: []
+        }).then(({ songs }) => songs);
+    } catch (e) {
+        console.error(e);
+        return songs;
+    }
+}
