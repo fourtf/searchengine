@@ -37,7 +37,7 @@ async function searchSongsByField(field: string, text: string, ): Promise<Record
     }
   });
 
-  return body;
+  return body.hits.hits.map((hit) => hit.fields);
 }
 
 async function msearch(text: string, pageno: number): Promise<Record<string, any>> {
