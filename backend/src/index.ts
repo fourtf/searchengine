@@ -24,14 +24,14 @@ async function typing(text: string): Promise<string[]> {
   return arrayUnique(body.hits.hits.map((hit) => hit.fields.name).flat());
 }
 
-async function searchByAlbum(text: string): Promise<Record<string, any>> {
+async function searchSongsByField(field: string, text: string, ): Promise<Record<string, any>> {
   const { body } = await client.search({
     index: index,
     body: {
       size: 50, fields: ["name", "id", "album", "artists"], _source: false,
       query: {
         match_phrase: {
-          album_id: text
+          [field]: text
         }
       }
     }
@@ -244,9 +244,10 @@ export const handler = async (
         // }
         return okJson(await msearch(query, pageno).then(tryAddCoverUrls));
       case "/album":
-        const { a } = event.queryStringParameters ?? {};
-        assertString(a, "a");
-        return okJson(await searchByAlbum(a));
+        const { field, hit } = event.queryStringParameters ?? {};
+        assertString(field, "field");
+        assertString(hit, "hit");
+        return okJson(await searchSongsByField(field, hit));
     }
   }
 
