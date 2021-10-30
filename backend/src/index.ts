@@ -43,7 +43,6 @@ async function searchSongsByField(field: string, text: string): Promise<Record<s
 }
 
 async function msearch(text: string, params: parameters): Promise<Record<string, any>> {
-  console.log(params);
   const { pageno, explicitFilter, yearFilter } = params; 
   const filter = [
     explicitFilter ? [{"term": {"explicit": explicitFilter}}] : [],
@@ -214,7 +213,7 @@ async function addCoverUrls(obj: SearchResult): Promise<SearchResult> {
   const ids = [...obj.songs.map(x => x.id), ...obj.artists.map(x => x.songId), ...obj.albums.map(x => x.songId)];
   const coversBySongId = await getCoverUrls(ids);
 
-  if (ids.length === 0) {
+  if (ids.length === 0 || coversBySongId === null) {
     return obj;
   }
 
