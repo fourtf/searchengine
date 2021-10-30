@@ -1,12 +1,14 @@
 import { Box, Button, Card, Typography } from "@mui/material";
 import { useTheme } from "@mui/system";
-import { ComponentType, useState } from "react";
+import { ComponentType, useMemo, useState } from "react";
 import { SearchResultMoreDialog } from "./SearchResultMoreDialog";
 import { ExpandMore } from "@mui/icons-material";
+import { justifyCenter } from "../util";
 
 export function SearchResultItems<T>(
   {
     title,
+    noElementText,
     items,
     isColumn,
     ItemComponent,
@@ -14,12 +16,14 @@ export function SearchResultItems<T>(
   }: {
     items: T[];
     title: string;
+    noElementText: string;
     isColumn: boolean;
     ItemComponent: ComponentType<T>;
     getItemKey: (item: T) => string;
   },
 ) {
   const [open, setOpen] = useState(false);
+  const itemCount = isColumn ? 5 : 4;
 
   return (
     <>
@@ -39,7 +43,7 @@ export function SearchResultItems<T>(
               }),
           }}
         >
-          {items.slice(0, isColumn ? 5 : 4).map((x) => (
+          {items.slice(0, itemCount).map((x) => (
             <ItemComponent
               key={getItemKey(x)}
               {...x}
@@ -47,17 +51,30 @@ export function SearchResultItems<T>(
           ))}
         </Box>
 
-        <MoreButton sx={{ marginTop: 2 }} onClick={() => setOpen(true)} />
+        {items.length > itemCount && (
+          <>
+            <MoreButton sx={{ marginTop: 2 }} onClick={() => setOpen(true)} />
 
-        <SearchResultMoreDialog
-          items={items}
-          open={open}
-          onClose={() => {
-            setOpen(false);
-          }}
-          ItemComponent={ItemComponent}
-          getItemKey={getItemKey}
-        />
+            <SearchResultMoreDialog
+              items={items}
+              open={open}
+              onClose={() => {
+                setOpen(false);
+              }}
+              ItemComponent={ItemComponent}
+              getItemKey={getItemKey}
+            />
+          </>
+        )}
+
+        {items.length === 0 &&
+          (
+            <Box sx={{ ...justifyCenter }}>
+              <Typography variant="body2" sx={{ color: "#999" }}>
+                {noElementText}
+              </Typography>
+            </Box>
+          )}
       </Category>
     </>
   );

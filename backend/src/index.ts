@@ -1,6 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { Client } from "@elastic/elasticsearch";
-import { arrayUnique, assertObject, assertString, okJson, stringifyArrays } from "./util";
+import { Album, arrayUnique, assertIsAlbumArray, assertIsSongArray, assertObject, assertString, assertStringArray, okJson, QueryResult, Song, stringifyArrays } from "./util";
+import { getCoverUrls } from "./spotify";
 
 const client = new Client({ node: "http://node-1.hska.io:9200/" });
 const index = "songsv2";
@@ -124,13 +125,58 @@ async function msearch(text: string, pageno: number): Promise<Record<string, any
     ]
   });
 
-  const resp = {
-    byName: body.responses[0].hits.hits.map((hit) => stringifyArrays(hit.fields)),
-    byArtists: body.responses[1].hits.hits.map((hit) => stringifyArrays(hit.fields)),
-    byAlbum: body.responses[2].aggregations.albums.buckets.flatMap(bucket => bucket.relevant.hits.hits.map((hit) => stringifyArrays(hit.fields)))
+  const byName = body.responses[0].hits.hits.map((hit) => stringifyArrays(hit.fields)) as unknown;
+  const byArtists = body.responses[1].hits.hits.map((hit) => stringifyArrays(hit.fields) as unknown);
+  const byAlbum = body.responses[2].aggregations.albums.buckets.flatMap(bucket => bucket.relevant.hits.hits.map((hit): Album => {
+    const { id, album, artists } = hit.fields as Record<string, unknown>;
+    assertStringArray(id, "id");
+    assertStringArray(album, "album");
+    assertStringArray(artists, "artists");
+
+    return {
+      songId: id[0] ?? "",
+      name: album[0] ?? "",
+      artists,
+    };
+  }));
+
+  assertIsSongArray(byArtists);
+  assertIsSongArray(byName);
+  assertIsAlbumArray(byAlbum);
+
+  return { byName, byArtists, byAlbum };
+}
+
+async function addCoverUrls(obj: QueryResult): Promise<QueryResult> {
+  const ids = [...obj.byName.map(x => x.id), ...obj.byArtists.map(x => x.id), ...obj.byAlbum.map(x => x.songId)];
+  const coversBySongId = await getCoverUrls(ids);
+
+  if (ids.length === 0) {
+    return obj;
   }
 
-  return resp;
+  function map<T extends Song | Album>(t: T): T {
+    return {
+      ...t,
+      coverUrl: coversBySongId["songId" in t ? t.songId : t.id]
+    };
+
+  }
+
+  return {
+    byName: obj.byName.map(map),
+    byArtists: obj.byArtists.map(map),
+    byAlbum: obj.byAlbum.map(map),
+  };
+}
+
+async function tryAddCoverUrls(obj: QueryResult): Promise<QueryResult> {
+  try {
+    return await addCoverUrls(obj);
+  } catch (e) {
+    console.error(e);
+    return obj;
+  }
 }
 
 export const handler = async (
