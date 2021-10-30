@@ -168,7 +168,7 @@ async function msearch(text: string, params: parameters): Promise<Record<string,
     assertStringArray(artist_ids, "artist_ids");
 
     return {
-      name: name[0] ?? "",
+      name: artists[0] ?? "",
       songId: id[0] ?? "",
       artistId: artist_ids[0] ?? ""
     };
