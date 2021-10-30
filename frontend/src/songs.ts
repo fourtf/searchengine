@@ -12,16 +12,14 @@ export function fetchSongs(field: string, hit: string) {
     const q = JSON.stringify({ field, hit });
     currentQuery = q;
     isFetchingSongsState.set(true);
+    songsDialogOpenState.set(true);
 
     (async () => {
         try {
             const res = await songs(field, hit);
 
             if (q === currentQuery) {
-                console.log("setting songs", res);
-
                 isFetchingSongsState.set(false);
-                songsDialogOpenState.set(true);
                 songsState.set(res);
             }
         } catch (e) {

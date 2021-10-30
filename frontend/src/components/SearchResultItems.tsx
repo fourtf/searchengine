@@ -58,6 +58,7 @@ export function SearchResultItems<T>(
             <SearchResultMoreDialog
               items={items}
               open={open}
+              isColumn={isColumn}
               onClose={() => {
                 setOpen(false);
               }}
