@@ -1,7 +1,7 @@
 import TextField from "@mui/material/TextField";
 import SearchIcon from "@mui/icons-material/Search";
 import EastIcon from "@mui/icons-material/East";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Autocomplete, {
   AutocompleteRenderInputParams,
 } from "@mui/material/Autocomplete";
@@ -13,6 +13,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { Box, Checkbox, FormControlLabel, useTheme } from "@mui/material";
 import Logo from "./Logo";
 import { alignCenter } from "../util";
+import { FilterAlt } from "@mui/icons-material";
+import FilterAltOutlined from "@mui/icons-material/FilterAltOutlined";
 
 export function SearchInput(props: any) {
   const theme = useTheme();
@@ -22,6 +24,11 @@ export function SearchInput(props: any) {
   const isSearching = useHookstate(isSearchingState);
   const [allowExplicit, setAllowExplicit] = useState(true);
   const [year, setYear] = useState<string>("");
+  const [showFilters, setShowFilters] = useState(false);
+  const hasFilters = useMemo(() => year.length > 0 || !allowExplicit, [
+    year,
+    allowExplicit,
+  ]);
 
   useEffect(() => {
     (async () => {
@@ -58,40 +65,51 @@ export function SearchInput(props: any) {
             freeSolo={true}
           />
         </Box>
+        <IconButton
+          onClick={() => setShowFilters(!showFilters)}
+          sx={{
+            marginLeft: 1,
+            background: showFilters ? "#eee" : "transparent",
+          }}
+        >
+          {hasFilters ? <FilterAlt /> : <FilterAltOutlined />}
+        </IconButton>
       </Box>
 
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginTop: 1,
-        }}
-      >
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={allowExplicit}
-              onChange={(_, v) => setAllowExplicit(v)}
-            />
-          }
-          label="Explicit Songs"
-          sx={{ marginTop: 1 }}
-        />
-        <TextField
-          label="Year"
-          placeholder="e.g. 2020"
-          size="small"
-          inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-          value={year}
-          onChange={(e) => setYear(e.target.value)}
+      {showFilters && (
+        <Box
           sx={{
-            marginLeft: 2,
-            marginTop: "10px",
-            width: "100px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginTop: 1,
           }}
-        />
-      </Box>
+        >
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={allowExplicit}
+                onChange={(_, v) => setAllowExplicit(v)}
+              />
+            }
+            label="Allow Explicit Songs"
+            sx={{ marginTop: 1 }}
+          />
+          <TextField
+            label="Year"
+            placeholder="e.g. 2020"
+            size="small"
+            inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+            value={year}
+            onChange={(e) => setYear(e.target.value)}
+            sx={{
+              marginLeft: 2,
+              marginTop: "10px",
+              width: "100px",
+            }}
+          />
+        </Box>
+      )}
     </>
   );
 
