@@ -136,9 +136,13 @@ async function msearch(text: string, pageno: number): Promise<QueryResult> {
   return { byName, byArtists, byAlbum };
 }
 
-async function tryAddCoverUrls(obj: QueryResult): Promise<QueryResult> {
+async function addCoverUrls(obj: QueryResult): Promise<QueryResult> {
   const ids = [...obj.byName.map(x => x.id), ...obj.byArtists.map(x => x.id), ...obj.byAlbum.map(x => x.songId)];
   const coversBySongId = await getCoverUrls(ids);
+
+  if (ids.length === 0) {
+    return obj;
+  }
 
   function map<T extends Song | Album>(t: T): T {
     return {
@@ -152,6 +156,15 @@ async function tryAddCoverUrls(obj: QueryResult): Promise<QueryResult> {
     byArtists: obj.byArtists.map(map),
     byAlbum: obj.byAlbum.map(map),
   };
+}
+
+async function tryAddCoverUrls(obj: QueryResult): Promise<QueryResult> {
+  try {
+    return await addCoverUrls(obj);
+  } catch (e) {
+    console.error(e);
+    return obj;
+  }
 }
 
 export const handler = async (

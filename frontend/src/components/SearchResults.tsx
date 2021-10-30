@@ -17,6 +17,7 @@ export default function SearchResults(props: any) {
       <SearchResultItems
         items={res.get()?.byName ?? []}
         title={"Songs"}
+        noElementText={"No songs found"}
         isColumn={true}
         ItemComponent={SongComponent}
         getItemKey={(x) => x.id}
@@ -25,6 +26,7 @@ export default function SearchResults(props: any) {
       <SearchResultItems
         items={res.get()?.byArtists ?? []}
         title="Artists"
+        noElementText={"No artists found"}
         isColumn={false}
         ItemComponent={ArtistComponent}
         getItemKey={(x) => x.id}
@@ -33,6 +35,7 @@ export default function SearchResults(props: any) {
       <SearchResultItems
         items={res.get()?.byAlbum ?? []}
         title="Albums"
+        noElementText={"No albums found"}
         isColumn={false}
         ItemComponent={AlbumComponent}
         getItemKey={(x) => x.songId}
