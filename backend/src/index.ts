@@ -153,13 +153,13 @@ async function msearch(text: string, pageno: number): Promise<Record<string, any
     assertStringArray(id, "id");
     assertStringArray(album, "album");
     assertStringArray(artists, "artists");
-    assertString(album_id, "album_id");
+    assertStringArray(album_id, "album_id");
 
     return {
       songId: id[0] ?? "",
       name: album[0] ?? "",
       artists,
-      albumId: album_id ?? "",
+      albumId: album_id[0] ?? "",
     };
   });
 
