@@ -1,6 +1,6 @@
 import { Box, Button, Card, Typography } from "@mui/material";
 import { useTheme } from "@mui/system";
-import { ComponentType, useMemo, useState } from "react";
+import { ComponentType, useState } from "react";
 import { SearchResultMoreDialog } from "./SearchResultMoreDialog";
 import { ExpandMore } from "@mui/icons-material";
 import { justifyCenter } from "../util";

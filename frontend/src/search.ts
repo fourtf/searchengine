@@ -1,29 +1,9 @@
 import { createState } from "@hookstate/core";
 import { search } from "./api";
+import { SearchResult } from "./shared";
 
 export interface SearchQuery {
   query: string;
-}
-
-export interface Song {
-  name: string;
-  id: string;
-  album: string;
-  artists: string[];
-  coverUrl?: string;
-}
-
-export interface Album {
-  name: string;
-  songId: string;
-  artists: string[];
-  coverUrl?: string;
-}
-
-export interface SearchResult {
-  byName: Song[];
-  byArtists: Song[];
-  byAlbum: Album[];
 }
 
 export const isSearchingState = createState(false);

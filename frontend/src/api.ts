@@ -1,4 +1,5 @@
-import { SearchQuery, SearchResult } from "./search";
+import { SearchQuery } from "./search";
+import { SearchResult, Song } from "./shared";
 
 const apiUrl =
   !/localhost/.test(window.location.host)
@@ -19,6 +20,20 @@ export async function typing(text: string): Promise<string[]> {
 export async function search(query: SearchQuery): Promise<SearchResult> {
   const res = await fetch(
     `${apiUrl}/search?query=${encodeURIComponent(query.query)}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  ).then((x) => x.json());
+
+  return res;
+}
+
+export async function songs(field: string, hit: string): Promise<Song[]> {
+  const res = await fetch(
+    `${apiUrl}/songs?field=${encodeURIComponent(field)}&hit=${encodeURIComponent(hit)}`,
     {
       method: "GET",
       headers: {

@@ -1,7 +1,9 @@
 import SpotifyWebApi from 'spotify-web-api-node';
 
 // MAKE CLIENT
-if (!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SECRET) {
+const canUseSpotify = process.env.SPOTIFY_CLIENT_ID && process.env.SPOTIFY_CLIENT_SECRET;
+
+if (!canUseSpotify) {
     console.error("SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET not set");
 }
 
@@ -32,6 +34,10 @@ async function refreshAccessToken(): Promise<void> {
 
 // FUNCTION
 export async function getCoverUrls(songIds: string[]): Promise<{ [id: string]: string | undefined } | null> {
+    if (!canUseSpotify) {
+        return null;
+    }
+
     await refreshAccessToken();
     const data = await sp.getTracks(songIds);
 

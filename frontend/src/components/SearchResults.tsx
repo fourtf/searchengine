@@ -1,10 +1,13 @@
 import { useHookstate } from "@hookstate/core";
-import { Avatar, Box, Paper } from "@mui/material";
+import { Avatar, Box, ButtonBase, Paper } from "@mui/material";
 import { useTheme } from "@mui/system";
-import { Album, searchResultState, Song } from "../search";
+import { searchResultState } from "../search";
+import { Album, Artist, Song } from "../shared";
+import { fetchSongs } from "../songs";
 import Clamped from "./Clamped";
 import Image from "./Image";
 import { SearchResultItems } from "./SearchResultItems";
+import SongResultHost from "./SongResultHost";
 
 const size = "128px";
 const sizeSm = "96px";
@@ -15,7 +18,7 @@ export default function SearchResults(props: any) {
   return (
     <Box {...props}>
       <SearchResultItems
-        items={res.get()?.byName ?? []}
+        items={res.get()?.songs ?? []}
         title={"Songs"}
         noElementText={"No songs found"}
         isColumn={true}
@@ -24,27 +27,31 @@ export default function SearchResults(props: any) {
       />
 
       <SearchResultItems
-        items={res.get()?.byArtists ?? []}
+        items={res.get()?.artists ?? []}
         title="Artists"
         noElementText={"No artists found"}
         isColumn={false}
         ItemComponent={ArtistComponent}
-        getItemKey={(x) => x.id}
+        getItemKey={(x) => x.songId}
       />
 
       <SearchResultItems
-        items={res.get()?.byAlbum ?? []}
+        items={res.get()?.albums ?? []}
         title="Albums"
         noElementText={"No albums found"}
         isColumn={false}
         ItemComponent={AlbumComponent}
         getItemKey={(x) => x.songId}
       />
+
+      <SongResultHost />
     </Box>
   );
 }
 
-function SongComponent({ name, artists, album, coverUrl }: Song) {
+export function SongComponent({ name, artists, album, coverUrl }: Song) {
+  console.log(name);
+
   return (
     <Box sx={{ display: "flex", flexDirection: "row" }}>
       <Paper
@@ -79,98 +86,107 @@ function SongComponent({ name, artists, album, coverUrl }: Song) {
   );
 }
 
-function ArtistComponent({ artists, coverUrl }: Song) {
+export function ArtistComponent({ name, artistId, coverUrl }: Artist) {
   const theme = useTheme();
 
-  const artist = artists[0] ?? "???";
-
   return (
-    <Box
-      sx={{
-        width: size,
-        marginTop: 2,
-
-        [theme.breakpoints.down("sm")]: {
-          width: sizeSm,
-        },
-      }}
-    >
-      <Paper
-        elevation={3}
+    <ButtonBase onClick={() => fetchSongs("artist_ids", artistId)}>
+      <Box
         sx={{
-          flexShrink: 0,
           width: size,
-          height: size,
-          borderRadius: 32,
-          marginBottom: 2,
+          marginTop: 2,
 
           [theme.breakpoints.down("sm")]: {
             width: sizeSm,
-            height: sizeSm,
-            marginRight: 2,
           },
         }}
       >
-        <Avatar
-          src={coverUrl}
-          alt={artist}
+        <Paper
+          elevation={3}
           sx={{
             flexShrink: 0,
-            width: "100%",
-            height: "100%",
+            width: size,
+            height: size,
+            borderRadius: 32,
+            marginBottom: 2,
+
+            [theme.breakpoints.down("sm")]: {
+              width: sizeSm,
+              height: sizeSm,
+              marginRight: 2,
+            },
           }}
-        />
-      </Paper>
-      <Box sx={{ textAlign: "center" }}>
-        {artist}
+        >
+          <Avatar
+            src={coverUrl}
+            alt={name}
+            sx={{
+              flexShrink: 0,
+              width: "100%",
+              height: "100%",
+            }}
+          />
+        </Paper>
+        <Box sx={{ textAlign: "center" }}>
+          {name}
+        </Box>
       </Box>
-    </Box>
+    </ButtonBase>
   );
 }
 
-function AlbumComponent({ name, artists, coverUrl }: Album) {
+export function AlbumComponent({ name, albumId, artists, coverUrl }: Album) {
   const theme = useTheme();
 
   return (
-    <Box
-      sx={{
-        width: size,
-        marginTop: 2,
-
-        [theme.breakpoints.down("sm")]: {
-          width: sizeSm,
-        },
-      }}
-    >
-      <Paper
-        square
-        elevation={3}
+    <ButtonBase onClick={() => fetchSongs("album_id", albumId)}>
+      {/* <Typography variant="body2" color="textSecondary"> */}
+      <Box
         sx={{
           width: size,
-          height: size,
-          marginBottom: 2,
+          marginTop: 2,
 
           [theme.breakpoints.down("sm")]: {
             width: sizeSm,
-            height: sizeSm,
+          },
+
+          ":hover": {
+            cursor: "pointer",
           },
         }}
       >
-        <img
-          src={coverUrl}
-          alt={name}
-          style={{ width: "100%", height: "100%" }}
+        <Paper
+          square
+          elevation={3}
+          sx={{
+            width: size,
+            height: size,
+            marginBottom: 2,
+
+            [theme.breakpoints.down("sm")]: {
+              width: sizeSm,
+              height: sizeSm,
+            },
+          }}
+        >
+          <img
+            src={coverUrl}
+            alt={name}
+            style={{ width: "100%", height: "100%" }}
+          />
+        </Paper>
+        <Clamped
+          sx={{ textAlign: "center" }}
+          text={name}
+          maxLines={2}
         />
-      </Paper>
-      <Clamped
-        sx={{ textAlign: "center" }}
-        text={name}
-        maxLines={2}
-      />
-      <Clamped
-        sx={{ textAlign: "center", color: "#999" }}
-        text={artists.join(", ")}
-      />
-    </Box>
+        <Clamped
+          sx={{ textAlign: "center", color: "#999" }}
+          text={artists.join(", ")}
+          maxLines={2}
+        />
+      </Box>
+      {/* </Typography> */}
+    </ButtonBase>
   );
 }

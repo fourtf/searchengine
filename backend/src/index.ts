@@ -1,6 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { Client } from "@elastic/elasticsearch";
-import { Album, arrayUnique, assertIsAlbumArray, assertIsSongArray, assertObject, assertString, assertStringArray, okJson, QueryResult, Song, stringifyArrays } from "./util";
+import { arrayUnique, assertIsAlbumArray, assertIsArtistArray, assertIsSongArray, assertObject, assertString, assertStringArray, okJson, stringifyArrays } from "./util";
+import { Album, Artist, SearchResult, Song } from "./shared";
 import { getCoverUrls } from "./spotify";
 
 const client = new Client({ node: "http://node-1.hska.io:9200/" });
@@ -24,7 +25,7 @@ async function typing(text: string): Promise<string[]> {
   return arrayUnique(body.hits.hits.map((hit) => hit.fields.name).flat());
 }
 
-async function searchSongsByField(field: string, text: string, ): Promise<Record<string, any>> {
+async function searchSongsByField(field: string, text: string,): Promise<Record<string, any>> {
   const { body } = await client.search({
     index: index,
     body: {
@@ -40,13 +41,13 @@ async function searchSongsByField(field: string, text: string, ): Promise<Record
   return body.hits.hits.map((hit) => stringifyArrays(hit.fields));
 }
 
-async function msearch(text: string, pageno: number): Promise<Record<string, any>> {
+async function msearch(text: string, pageno: number): Promise<SearchResult> {
   const onlyExplicit = true;
   const releaseDate = "2013-07-26";
   const filter = [
-    onlyExplicit ? [{"term": {"explicit": "True"}}] : []
+    onlyExplicit ? [{ "term": { "explicit": "True" } }] : []
   ].flat();
-  
+
   const { body } = await client.msearch({
     index: index,
     body: [
@@ -88,7 +89,7 @@ async function msearch(text: string, pageno: number): Promise<Record<string, any
       },
       {}, // Query for Artists
       {
-        from: (pageno - 1) * 10, size: 10, fields: ["name", "id", "album", "artists"], _source: false,
+        from: (pageno - 1) * 10, size: 10, fields: ["name", "id", "artists", "artist_ids"], _source: false,
         query: {
           bool: {
             should: [
@@ -171,9 +172,21 @@ async function msearch(text: string, pageno: number): Promise<Record<string, any
     ]
   });
 
-  const byName = body.responses[0].hits.hits.map((hit) => stringifyArrays(hit.fields)) as unknown;
-  const byArtists = body.responses[1].hits.hits.map((hit) => stringifyArrays(hit.fields) as unknown);
-  const byAlbum = body.responses[2].hits.hits.map((hit): Album => {
+  const songs = body.responses[0].hits.hits.map((hit) => stringifyArrays(hit.fields)) as unknown;
+  const artists = body.responses[1].hits.hits.map((hit): Artist => {
+    const { name, id, artists, artist_ids } = hit.fields;
+    assertStringArray(name, "name");
+    assertStringArray(id, "id");
+    assertStringArray(artists, "artists");
+    assertStringArray(artist_ids, "artist_ids");
+
+    return {
+      name: name[0] ?? "",
+      songId: id[0] ?? "",
+      artistId: artist_ids[0] ?? ""
+    };
+  });
+  const albums = body.responses[2].hits.hits.map((hit): Album => {
     const { id, album, artists, album_id } = hit.fields as Record<string, unknown>;
     assertStringArray(id, "id");
     assertStringArray(album, "album");
@@ -188,22 +201,22 @@ async function msearch(text: string, pageno: number): Promise<Record<string, any
     };
   });
 
-  assertIsSongArray(byArtists);
-  assertIsSongArray(byName);
-  assertIsAlbumArray(byAlbum);
+  assertIsSongArray(songs);
+  assertIsArtistArray(artists);
+  assertIsAlbumArray(albums);
 
-  return { byName, byArtists, byAlbum };
+  return { songs, artists, albums };
 }
 
-async function addCoverUrls(obj: QueryResult): Promise<QueryResult> {
-  const ids = [...obj.byName.map(x => x.id), ...obj.byArtists.map(x => x.id), ...obj.byAlbum.map(x => x.songId)];
+async function addCoverUrls(obj: SearchResult): Promise<SearchResult> {
+  const ids = [...obj.songs.map(x => x.id), ...obj.artists.map(x => x.songId), ...obj.albums.map(x => x.songId)];
   const coversBySongId = await getCoverUrls(ids);
 
   if (ids.length === 0) {
     return obj;
   }
 
-  function map<T extends Song | Album>(t: T): T {
+  function map<T extends Song | Album | Artist>(t: T): T {
     return {
       ...t,
       coverUrl: coversBySongId["songId" in t ? t.songId : t.id]
@@ -212,13 +225,13 @@ async function addCoverUrls(obj: QueryResult): Promise<QueryResult> {
   }
 
   return {
-    byName: obj.byName.map(map),
-    byArtists: obj.byArtists.map(map),
-    byAlbum: obj.byAlbum.map(map),
+    songs: obj.songs.map(map),
+    artists: obj.artists.map(map),
+    albums: obj.albums.map(map),
   };
 }
 
-async function tryAddCoverUrls(obj: QueryResult): Promise<QueryResult> {
+async function tryAddCoverUrls(obj: SearchResult): Promise<SearchResult> {
   try {
     return await addCoverUrls(obj);
   } catch (e) {
@@ -245,14 +258,14 @@ export const handler = async (
         const { query, p } = event.queryStringParameters ?? {};
         assertString(query, "query");
         const pageno = p ? parseInt(p) : 1;
-        
+
         // Returns in format {
-        // byName: [{name: "xyz", id: "123"}],
-        // byArtists: [{name: "xyz", id: "123"}],
-        // byAlbum: [{name: "xyz", id: "123"}]
+        // songs: [{name: "xyz", id: "123"}],
+        // artists: [{name: "xyz", id: "123"}],
+        // albums: [{name: "xyz", id: "123"}]
         // }
         return okJson(await msearch(query, pageno).then(tryAddCoverUrls));
-      case "/album":
+      case "/songs":
         const { field, hit } = event.queryStringParameters ?? {};
         assertString(field, "field");
         assertString(hit, "hit");

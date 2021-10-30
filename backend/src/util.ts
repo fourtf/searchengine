@@ -1,4 +1,5 @@
 import { APIGatewayProxyResult } from "aws-lambda";
+import { Album, Artist, Song } from "./shared";
 
 export function assertObject(
   x: unknown,
@@ -34,13 +35,6 @@ export function assertStringArray(x: unknown, name: string): asserts x is string
   x.forEach((y) => assertString(y, "array element"));
 }
 
-export interface Song {
-  name: string;
-  id: string;
-  album: string;
-  artists: string[];
-  coverUrl?: string;
-}
 
 export function assertIsSong(obj: any): asserts obj is Song {
   assertObject(obj, "song");
@@ -56,13 +50,6 @@ export function assertIsSongArray(obj: any): asserts obj is Song[] {
   obj.forEach(assertIsSong);
 }
 
-export interface Album {
-  name: string;
-  songId: string;
-  albumId: string;
-  artists: string[];
-  coverUrl?: string;
-}
 
 export function assertIsAlbum(obj: any): asserts obj is Album {
   assertObject(obj, "album");
@@ -77,11 +64,20 @@ export function assertIsAlbumArray(obj: any): asserts obj is Album[] {
   obj.forEach(assertIsAlbum);
 }
 
-export interface QueryResult {
-  byName: Song[];
-  byArtists: Song[];
-  byAlbum: Album[];
+
+export function assertIsArtist(obj: any): asserts obj is Artist {
+  assertObject(obj, "artist");
+  assertString(obj.name, "name");
+  assertString(obj.songId, "songId");
+  assertString(obj.artistId, "artistId");
+  assertStringOrUndefined(obj.coverUrl, "coverUrl");
 }
+
+export function assertIsArtistArray(obj: any): asserts obj is Artist[] {
+  assertArray(obj, "artist array");
+  obj.forEach(assertIsArtist);
+}
+
 
 export function okJson(t: any): APIGatewayProxyResult {
   return {
