@@ -28,9 +28,9 @@ async function msearch(text: string, pageno: number): Promise<Record<string, any
   const { body } = await client.msearch({
     index: index,
     body: [
-      { }, // Query for song names
+      {}, // Query for song names
       {
-        from: (pageno - 1) * 10, size: 9, fields: ["name", "id", "album", "artists"], _source: false,
+        from: (pageno - 1) * 10, size: 10, fields: ["name", "id", "album", "artists"], _source: false,
         query: {
           bool: {
             should: [
@@ -63,28 +63,28 @@ async function msearch(text: string, pageno: number): Promise<Record<string, any
           }
         }
       },
-      { }, // Query for Artists
+      {}, // Query for Artists
       {
-        from: (pageno - 1) * 10, size: 9, fields: ["name", "id", "album", "artists"], _source: false,
+        from: (pageno - 1) * 10, size: 10, fields: ["name", "id", "album", "artists"], _source: false,
         query: {
           bool: {
             should: [
-            {
-              match: {
-                first_artist_kw: {
-                  query: text,
-                  fuzziness: autoFuzzy ? "AUTO" : "0"
+              {
+                match: {
+                  first_artist: {
+                    query: text,
+                    fuzziness: autoFuzzy ? "AUTO" : "0"
+                  }
+                }
+              },
+              {
+                match_phrase: {
+                  first_artist: {
+                    query: text,
+                    boost: 2
+                  }
                 }
               }
-            },
-            {
-              match_phrase: {
-                first_artist_kw: {
-                query: text,
-                boost: 2
-                }
-              }
-            }
             ]
           }
         },
@@ -98,7 +98,7 @@ async function msearch(text: string, pageno: number): Promise<Record<string, any
       },
       {}, // Query for albums
       {
-        from: (pageno - 1) * 10, size: 9, fields: ["name", "id", "album", "artists"], _source: false,
+        from: (pageno - 1) * 10, size: 10, fields: ["name", "id", "album", "artists"], _source: false,
         query: {
           match: {
             album: {
@@ -199,11 +199,11 @@ export const handler = async (
         const pageno = p ? parseInt(p) : 1;
 
         // Returns in format {
-          // byName: [{name: "xyz", id: "123"}],
-          // byArtists: [{name: "xyz", id: "123"}],
-          // byAlbum: [{name: "xyz", id: "123"}]
+        // byName: [{name: "xyz", id: "123"}],
+        // byArtists: [{name: "xyz", id: "123"}],
+        // byAlbum: [{name: "xyz", id: "123"}]
         // }
-        return okJson(await msearch(query, pageno));
+        return okJson(await msearch(query, pageno).then(tryAddCoverUrls));
     }
   }
 
