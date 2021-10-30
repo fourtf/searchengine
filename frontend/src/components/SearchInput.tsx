@@ -10,12 +10,18 @@ import { typing as apiTyping } from "../api";
 import { isSearchingState, performSearch } from "../search";
 import { useHookstate } from "@hookstate/core";
 import CircularProgress from "@mui/material/CircularProgress";
+import { Box, Checkbox, FormControlLabel, useTheme } from "@mui/material";
+import Logo from "./Logo";
+import { alignCenter } from "../util";
 
 export function SearchInput(props: any) {
+  const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const isSearching = useHookstate(isSearchingState);
+  const [allowExplicit, setAllowExplicit] = useState(true);
+  const [year, setYear] = useState<string>("");
 
   useEffect(() => {
     (async () => {
@@ -30,22 +36,67 @@ export function SearchInput(props: any) {
   }, [open]);
 
   return (
-    <Autocomplete
-      {...props}
-      id="asynchronous-demo"
-      open={open}
-      onOpen={() => setOpen(true)}
-      onClose={() => setOpen(false)}
-      isOptionEqualToValue={(option, value) => option === value}
-      getOptionLabel={(option) => option}
-      options={options}
-      renderInput={Input}
-      freeSolo={true}
-    />
+    <>
+      <Box sx={{ ...alignCenter }}>
+        <Logo
+          sx={{
+            marginRight: 2,
+            [theme.breakpoints.down("sm")]: { display: "none" },
+          }}
+        />
+        <Box sx={{ width: "100%" }}>
+          <Autocomplete
+            {...props}
+            id="asynchronous-demo"
+            open={open}
+            onOpen={() => setOpen(true)}
+            onClose={() => setOpen(false)}
+            isOptionEqualToValue={(option, value) => option === value}
+            getOptionLabel={(option) => option}
+            options={options}
+            renderInput={Input}
+            freeSolo={true}
+          />
+        </Box>
+      </Box>
+
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginTop: 1,
+        }}
+      >
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={allowExplicit}
+              onChange={(_, v) => setAllowExplicit(v)}
+            />
+          }
+          label="Explicit Songs"
+          sx={{ marginTop: 1 }}
+        />
+        <TextField
+          label="Year"
+          placeholder="e.g. 2020"
+          size="small"
+          inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+          value={year}
+          onChange={(e) => setYear(e.target.value)}
+          sx={{
+            marginLeft: 2,
+            marginTop: "10px",
+            width: "100px",
+          }}
+        />
+      </Box>
+    </>
   );
 
   function go() {
-    performSearch({ query });
+    performSearch({ query, allowExplicit, year });
   }
 
   function Input(params: AutocompleteRenderInputParams) {

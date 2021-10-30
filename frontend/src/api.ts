@@ -18,8 +18,11 @@ export async function typing(text: string): Promise<string[]> {
 }
 
 export async function search(query: SearchQuery): Promise<SearchResult> {
+  const explicit = query.allowExplicit ? "" : "&fExplicit=False";
+  const year = query.year ? `&fYear=${encodeURIComponent(query.year)}` : "";
+
   const res = await fetch(
-    `${apiUrl}/search?query=${encodeURIComponent(query.query)}`,
+    `${apiUrl}/search?query=${encodeURIComponent(query.query)}${explicit}${year}`,
     {
       method: "GET",
       headers: {

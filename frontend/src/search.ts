@@ -4,6 +4,8 @@ import { SearchResult } from "./shared";
 
 export interface SearchQuery {
   query: string;
+  allowExplicit: boolean;
+  year: string;
 }
 
 export const isSearchingState = createState(false);

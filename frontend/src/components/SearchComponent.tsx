@@ -1,5 +1,5 @@
 import Box from "@mui/material/Box";
-import { alignCenter, justifyCenter } from "../util";
+import { justifyCenter } from "../util";
 import Card from "@mui/material/Card";
 import Logo from "./Logo";
 import useTheme from "@mui/material/styles/useTheme";
@@ -44,15 +44,7 @@ export default function SearchComponent() {
           },
         }}
       >
-        <Box sx={{ ...alignCenter }}>
-          <Logo
-            sx={{
-              marginRight: 2,
-              [theme.breakpoints.down("sm")]: { display: "none" },
-            }}
-          />
-          <SearchInput sx={{ flex: 1 }} />
-        </Box>
+        <SearchInput sx={{ flex: 1 }} />
       </Card>
 
       {results.get() === null

@@ -1,4 +1,4 @@
-import { Dialog } from "@mui/material";
+import { Box, Dialog } from "@mui/material";
 import { ComponentType, useState } from "react";
 
 export function SearchResultMoreDialog<T>(
@@ -15,7 +15,13 @@ export function SearchResultMoreDialog<T>(
 
   return (
     <Dialog open={open} onClose={onClose}>
-      {data.map((x) => <ItemComponent key={getItemKey(x)} {...x} />)}
+      <Box sx={{ margin: 4 }}>
+        {data.map((x) => (
+          <Box sx={{ marginTop: 2 }}>
+            <ItemComponent key={getItemKey(x)} {...x} />
+          </Box>
+        ))}
+      </Box>
     </Dialog>
   );
 }

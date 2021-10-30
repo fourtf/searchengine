@@ -46,7 +46,7 @@ async function msearch(text: string, params: parameters): Promise<Record<string,
   const filter = [
     explicitFilter ? [{ "term": { "explicit": explicitFilter } }] : [],
     yearFilter ? [{ "term": { "year": yearFilter } }] : [],
-    durationFilter ? [{ "range": { "duration_ms": { "gte": 0, "lte": durationFilter}}}] : []
+    durationFilter ? [{ "range": { "duration_ms": { "gte": 0, "lte": durationFilter } } }] : []
   ].flat();
 
   const { body } = await client.msearch({
@@ -155,20 +155,6 @@ async function msearch(text: string, params: parameters): Promise<Record<string,
             size: 1
           }
         }
-        // aggs: {
-        //   albums: {
-        //     terms: { "field": "album_id", size: 9 },
-        //     aggs: {
-        //       relevant: {
-        //         top_hits: {
-        //           size: 1,
-        //           _source: false,
-        //           fields: ["id", "album", "artists"]
-        //         }
-        //       }
-        //     }
-        //   }
-        // }
       }
     ]
   });

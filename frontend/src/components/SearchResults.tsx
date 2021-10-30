@@ -1,5 +1,5 @@
 import { useHookstate } from "@hookstate/core";
-import { Avatar, Box, ButtonBase, Paper } from "@mui/material";
+import { Avatar, Box, ButtonBase, Link, Paper } from "@mui/material";
 import { useTheme } from "@mui/system";
 import { searchResultState } from "../search";
 import { Album, Artist, Song } from "../shared";
@@ -49,40 +49,43 @@ export default function SearchResults(props: any) {
   );
 }
 
-export function SongComponent({ name, artists, album, coverUrl }: Song) {
-  console.log(name);
-
+export function SongComponent({ name, id, artists, album, coverUrl }: Song) {
   return (
-    <Box sx={{ display: "flex", flexDirection: "row" }}>
-      <Paper
-        square
-        elevation={3}
-        sx={{ width: 48, height: 48, marginRight: 2, flexShrink: 0 }}
-      >
-        <Image
-          src={coverUrl}
-          alt={name}
-          style={{ width: "100%", height: "100%" }}
-          loadingElement={
-            <svg
-              width="128"
-              height="128"
-              viewBox="0 0 128 128"
-              style={{ width: "100%", height: "100%" }}
-            >
-              <circle cx="64" cy="64" r="58" fill="#f5f5f5" />
-            </svg>
-          }
-        />
-      </Paper>
-      <Box>
-        <Clamped text={name} maxLines={2} />
-        <Clamped
-          sx={{ color: "#999" }}
-          text={`${artists.join(", ")} - ${album}`}
-        />
+    <Link
+      href={`https://open.spotify.com/track/${encodeURIComponent(id)}`}
+      underline="none"
+    >
+      <Box sx={{ display: "flex", flexDirection: "row" }}>
+        <Paper
+          square
+          elevation={3}
+          sx={{ width: 48, height: 48, marginRight: 2, flexShrink: 0 }}
+        >
+          <Image
+            src={coverUrl}
+            alt={name}
+            style={{ width: "100%", height: "100%" }}
+            loadingElement={
+              <svg
+                width="128"
+                height="128"
+                viewBox="0 0 128 128"
+                style={{ width: "100%", height: "100%" }}
+              >
+                <circle cx="64" cy="64" r="58" fill="#f5f5f5" />
+              </svg>
+            }
+          />
+        </Paper>
+        <Box>
+          <Clamped text={name} maxLines={2} />
+          <Clamped
+            sx={{ color: "#999" }}
+            text={`${artists.join(", ")} - ${album}`}
+          />
+        </Box>
       </Box>
-    </Box>
+    </Link>
   );
 }
 
