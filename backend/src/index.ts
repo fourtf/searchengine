@@ -98,47 +98,70 @@ async function msearch(text: string, pageno: number): Promise<Record<string, any
       },
       {}, // Query for albums
       {
-        from: (pageno - 1) * 10, size: 10, fields: ["name", "id", "album", "artists"], _source: false,
+        from: (pageno - 1) * 10, size: 10, fields: ["name", "id", "album", "artists", "album_id"], _source: false,
         query: {
-          match: {
-            album: {
-              query: text,
-              fuzziness: autoFuzzy ? "AUTO" : "0",
-            }
-          }
-        },
-        aggs: {
-          albums: {
-            terms: { "field": "album_id", size: 9 },
-            aggs: {
-              relevant: {
-                top_hits: {
-                  size: 1,
-                  _source: false,
-                  fields: ["id", "album", "artists"]
+          bool: {
+            should: [
+              {
+                match: {
+                  album: {
+                    query: text,
+                    fuzziness: autoFuzzy ? "AUTO" : "0",
+                  }
+                }
+              },
+              {
+                match: {
+                  artist: {
+                    query: text,
+                    fuzziness: autoFuzzy ? "AUTO" : "0",
+                  }
                 }
               }
-            }
+            ]
+          }
+        },
+        collapse: {
+          field: "album_id",
+          inner_hits: {
+            name: "latest",
+            size: 1
           }
         }
+        // aggs: {
+        //   albums: {
+        //     terms: { "field": "album_id", size: 9 },
+        //     aggs: {
+        //       relevant: {
+        //         top_hits: {
+        //           size: 1,
+        //           _source: false,
+        //           fields: ["id", "album", "artists"]
+        //         }
+        //       }
+        //     }
+        //   }
+        // }
       }
     ]
   });
 
   const byName = body.responses[0].hits.hits.map((hit) => stringifyArrays(hit.fields)) as unknown;
   const byArtists = body.responses[1].hits.hits.map((hit) => stringifyArrays(hit.fields) as unknown);
-  const byAlbum = body.responses[2].aggregations.albums.buckets.flatMap(bucket => bucket.relevant.hits.hits.map((hit): Album => {
-    const { id, album, artists } = hit.fields as Record<string, unknown>;
+  const byAlbum = body.responses[2].hits.hits.map((hit): Album => {
+    const { id, album, artists, album_id } = hit.fields as Record<string, unknown>;
     assertStringArray(id, "id");
     assertStringArray(album, "album");
     assertStringArray(artists, "artists");
+    assertString(album_id, "album_id");
 
     return {
       songId: id[0] ?? "",
       name: album[0] ?? "",
       artists,
+      albumId: album_id ?? "",
     };
-  }));
+  });
 
   assertIsSongArray(byArtists);
   assertIsSongArray(byName);

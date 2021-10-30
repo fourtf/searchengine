@@ -59,6 +59,7 @@ export function assertIsSongArray(obj: any): asserts obj is Song[] {
 export interface Album {
   name: string;
   songId: string;
+  albumId: string;
   artists: string[];
   coverUrl?: string;
 }
