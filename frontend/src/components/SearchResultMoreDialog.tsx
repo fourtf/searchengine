@@ -21,32 +21,37 @@ export function SearchResultMoreDialog<T>(
 ) {
   const [data] = useState<T[]>(items);
 
-  return (
-    <Dialog open={open} onClose={onClose} fullWidth={true}>
-      <Box
-        sx={{
-          margin: 2,
-          display: "flex",
-          ...(isColumn
-            ? {
-              flexDirection: "column",
-              "> *": { marginTop: 2 },
-            }
-            : {
-              justifyContent: "space-around",
-              flexWrap: "wrap",
-            }),
-        }}
-      >
-        {data.map((x) => (
-          <Box
-            key={getItemKey(x)}
-            sx={{ marginTop: 2, marginLeft: 1, marginRight: 1 }}
-          >
-            <ItemComponent {...x} />
-          </Box>
-        ))}
-      </Box>
-    </Dialog>
-  );
+  try {
+    return (
+      <Dialog open={open} onClose={onClose} fullWidth={true}>
+        <Box
+          sx={{
+            margin: 2,
+            display: "flex",
+            ...(isColumn
+              ? {
+                flexDirection: "column",
+                "> *": { marginTop: 2 },
+              }
+              : {
+                justifyContent: "space-around",
+                flexWrap: "wrap",
+              }),
+          }}
+        >
+          {data.map((x) => (
+            <Box
+              key={getItemKey(x)}
+              sx={{ marginTop: 2, marginLeft: 1, marginRight: 1 }}
+            >
+              <ItemComponent {...x} />
+            </Box>
+          ))}
+        </Box>
+      </Dialog>
+    );
+  } catch (e) {
+    console.error(e);
+    return <Box>exception</Box>;
+  }
 }
